@@ -17,7 +17,7 @@ This section covers the requirements that must be met by the plugin-sdk in order
 The safer way to start is to use a [virtal environment](https://virtualenv.pypa.io/en/stable/). Once activated, just run
 
  ```bash
- pip install ob-plugin-sdk
+ pip install python-plugin-sdk
  ```
 
 After that, in this virtual environment a module *interfaces* will be available from which you can inherit the AbstractVimDriver class.

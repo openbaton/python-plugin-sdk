@@ -19,6 +19,7 @@ from abc import abstractmethod, ABCMeta
 #
 # package: org.openbaton.vim.drivers.interfaces
 from org.openbaton.plugin.sdk.abstracts import AbstractPluginHelper
+from org.openbaton.plugin.sdk.catalogue import Server, NFVImage, Network, DeploymentFlavour, Subnet, Quota
 
 log = logging.getLogger("org.openbaton.plguin.vim.sdk.%s" % __name__)
 
@@ -31,107 +32,114 @@ class VimDriver(AbstractPluginHelper):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def launch_instance(self, vim_instance, name, image, flavor, keypair, networks, security_groups, user_data):
+    def launch_instance(self, vim_instance: dict,
+                        name: str,
+                        image: str,
+                        flavor: str,
+                        keypair: str,
+                        networks: [dict],
+                        security_groups: [str],
+                        user_data: str) -> Server:
         """ generated source for method launchInstance """
 
     @abstractmethod
-    def list_images(self, vim_instance):
+    def list_images(self, vim_instance: dict) -> [NFVImage]:
         """ generated source for method listImages """
 
     @abstractmethod
-    def list_server(self, vim_instance):
+    def list_server(self, vim_instance: dict) -> [Server]:
         """ generated source for method listServer """
 
     @abstractmethod
-    def list_networks(self, vim_instance):
+    def list_networks(self, vim_instance: dict) -> [Network]:
         """ generated source for method listNetworks """
 
     @abstractmethod
-    def list_flavors(self, vim_instance):
+    def list_flavors(self, vim_instance: dict) -> [DeploymentFlavour]:
         """ generated source for method listFlavors """
 
     @abstractmethod
     def launch_instance_and_wait(self,
-                                 vim_instance,
-                                 hostname,
-                                 image,
-                                 ext_id,
-                                 key_pair,
-                                 networks,
-                                 security_groups,
-                                 user_data,
-                                 floating_ips=None,
-                                 keys=None):
+                                 vim_instance: dict,
+                                 hostname: str,
+                                 image: str,
+                                 ext_id: str,
+                                 key_pair: str,
+                                 networks: [dict],
+                                 security_groups: [str],
+                                 user_data: str,
+                                 floating_ips: dict = None,
+                                 keys: [dict] = None) -> Server:
         """ generated source for method launchInstanceAndWait """
 
     @abstractmethod
-    def delete_server_by_id_and_wait(self, vim_instance, ext_id):
+    def delete_server_by_id_and_wait(self, vim_instance: dict, ext_id: str):
         """ generated source for method deleteServerByIdAndWait """
 
     @abstractmethod
-    def create_network(self, vim_instance, network):
+    def create_network(self, vim_instance: dict, network: dict) -> Network:
         """ generated source for method createNetwork """
 
     @abstractmethod
-    def add_flavor(self, vim_instance, deployment_flavour):
+    def add_flavor(self, vim_instance: dict, deployment_flavour: dict) -> DeploymentFlavour:
         """ generated source for method addFlavor """
 
     @abstractmethod
-    def add_image(self, vim_instance, image, image_file_or_url):
+    def add_image(self, vim_instance: dict, image: dict, image_file_or_url: str) -> NFVImage:
         """ generated source for method addImage """
 
     @abstractmethod
-    def update_image(self, vim_instance, image):
+    def update_image(self, vim_instance: str, image: dict) -> NFVImage:
         """ generated source for method updateImage """
 
     @abstractmethod
-    def copy_image(self, vim_instance, image, image_file):
+    def copy_image(self, vim_instance: dict, image: dict, image_file: [bytes]) -> NFVImage:
         """ generated source for method copyImage """
 
     @abstractmethod
-    def delete_image(self, vim_instance, image):
+    def delete_image(self, vim_instance: dict, image: dict) -> bool:
         """ generated source for method deleteImage """
 
     @abstractmethod
-    def update_flavor(self, vim_instance, deployment_flavour):
+    def update_flavor(self, vim_instance: dict, deployment_flavour: dict) -> DeploymentFlavour:
         """ generated source for method updateFlavor """
 
     @abstractmethod
-    def delete_flavor(self, vim_instance, ext_id):
+    def delete_flavor(self, vim_instance: dict, ext_id: str) -> bool:
         """ generated source for method deleteFlavor """
 
     @abstractmethod
-    def create_subnet(self, vim_instance, created_network, subnet):
+    def create_subnet(self, vim_instance: dict, created_network: dict, subnet: dict) -> Subnet:
         """ generated source for method createSubnet """
 
     @abstractmethod
-    def update_network(self, vim_instance, network):
+    def update_network(self, vim_instance: dict, network: dict) -> Network:
         """ generated source for method updateNetwork """
 
     @abstractmethod
-    def update_subnet(self, vim_instance, updated_network, subnet):
+    def update_subnet(self, vim_instance: dict, updated_network: dict, subnet: dict) -> Subnet:
         """ generated source for method updateSubnet """
 
     @abstractmethod
-    def get_subnets_ext_ids(self, vim_instance, network_ext_id):
+    def get_subnets_ext_ids(self, vim_instance: dict, network_ext_id: str) -> [str]:
         """ generated source for method getSubnetsExtIds """
 
     @abstractmethod
-    def delete_subnet(self, vim_instance, existing_subnet_ext_id):
+    def delete_subnet(self, vim_instance: dict, existing_subnet_ext_id: str) -> bool:
         """ generated source for method deleteSubnet """
 
     @abstractmethod
-    def delete_network(self, vim_instance, ext_id):
+    def delete_network(self, vim_instance: dict, ext_id: str) -> bool:
         """ generated source for method deleteNetwork """
 
     @abstractmethod
-    def get_network_by_id(self, vim_instance, ext_id):
+    def get_network_by_id(self, vim_instance: dict, ext_id: str) -> Network:
         """ generated source for method getNetworkById """
 
     @abstractmethod
-    def get_quota(self, vim_instance):
+    def get_quota(self, vim_instance: dict) -> Quota:
         """ generated source for method getQuota """
 
     @abstractmethod
-    def get_type(self, vim_instance):
+    def get_type(self, vim_instance: dict) -> str:
         """ generated source for method getType """
