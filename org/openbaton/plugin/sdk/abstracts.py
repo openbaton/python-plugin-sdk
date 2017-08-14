@@ -3,6 +3,7 @@ import logging
 import os
 import threading
 import traceback
+from datetime import date
 
 import pika
 
@@ -72,7 +73,20 @@ class AbstractPluginHelper(threading.Thread):
         method = getattr(self, method_name)
         answer = {}
         try:
-            answer['answer'] = method(*params)
+            ret_obj = method(*params)
+            if not isinstance(ret_obj,dict) and not isinstance(ret_obj,list):
+                answer['answer'] = ret_obj.__dict__
+            elif isinstance(ret_obj, list):
+                answer['answer'] = []
+                for obj in ret_obj:
+                    if type(obj) in (int, float, bool, str, date, dict):
+                        answer['answer'] = ret_obj
+                        break
+                    else:
+                        answer['answer'].append(obj.__dict__)
+            else:
+                answer['answer'] = ret_obj
+
         except:
             traceback.print_exc()
             answer['exception'] = traceback._cause_message
