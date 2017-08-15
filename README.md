@@ -9,7 +9,7 @@ This project contains a vnfm sdk for python projects.
 ## Technical Requirements
 This section covers the requirements that must be met by the plugin-sdk in order to satisfy the demands for such a component:
 
-* python 2.7 or 3.5
+* python 3.5
 * pika
 
 ## How to install python-plugin-sdk

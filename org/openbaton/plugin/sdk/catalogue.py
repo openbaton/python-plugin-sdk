@@ -18,7 +18,13 @@
 #  *
 #  
 # package: org.openbaton.catalogue.nfvo
+import json
 from datetime import date
+
+
+class _BaseObject(object):
+    def get_dict(self):
+        return self.__dict__
 
 
 class ImageStatus:
@@ -32,7 +38,7 @@ class ImageStatus:
     DELETED = u'DELETED'
 
 
-class NFVImage(object):
+class NFVImage(_BaseObject):
     def __init__(self, _id: str = None,
                  version: str = None,
                  ext_id: str = None,
@@ -88,25 +94,7 @@ class NFVImage(object):
                ", updated='" + updated_isoformat + '\'' + '}'
 
 
-class Network(object):
-    def __init__(self, _id: str = None, version: int = None, name: str = None, ext_id: str = None,
-                 external: bool = False, shared: bool = False, subnets: list = []):
-        self.id = _id
-        self.version = version
-        self.name = name
-        self.extId = ext_id
-        self.external = external
-        self.shared = shared
-        self.subnets = subnets
-
-    def __str__(self):
-        """ generated source for method toString """
-        return "Network{" + "id='" + self.id + '\'' + ", name='" + self.name + '\'' + \
-               ", extId='" + self.extId + '\'' + ", external=" + str(self.external) + \
-               ", shared=" + str(self.shared) + ", subnets=" + str(self.subnets) + '}'
-
-
-class Subnet(object):
+class Subnet(_BaseObject):
     """ generated source for class Subnet """
 
     def __init__(self, _id: str = None, _version: int = None, name: str = None, ext_id: str = None,
@@ -127,7 +115,30 @@ class Subnet(object):
                ", gatewayIp='" + self.gatewayIp + '\'' + '}'
 
 
-class DeploymentFlavour(object):
+class Network(_BaseObject):
+    def __init__(self, _id: str = None, version: int = None, name: str = None, ext_id: str = None,
+                 external: bool = False, shared: bool = False, subnets: [Subnet] = []):
+        self.id = _id
+        self.version = version
+        self.name = name
+        self.extId = ext_id
+        self.external = external
+        self.shared = shared
+        self.subnets = subnets
+
+    def __str__(self):
+        """ generated source for method toString """
+        return "Network{" + "id='" + self.id + '\'' + ", name='" + self.name + '\'' + \
+               ", extId='" + self.extId + '\'' + ", external=" + str(self.external) + \
+               ", shared=" + str(self.shared) + ", subnets=" + str(self.subnets) + '}'
+
+    def get_dict(self):
+        _dict = self.__dict__
+        _dict['subnets'] = [sub.__dict__ for sub in self.subnets]
+        return _dict
+
+
+class DeploymentFlavour(_BaseObject):
     """ generated source for class DeploymentFlavour """
 
     def __init__(self, _id: str = None, _version: int = None, flavour_key: str = None, ext_id: str = None,
@@ -154,7 +165,7 @@ class DeploymentFlavour(object):
                ", flavour_key='" + self.flavour_key + '\'' + ", extId='" + self.extId + '\'' + '}'
 
 
-class Location(object):
+class Location(_BaseObject):
     """ generated source for class Location """
 
     def __init__(self, _id=None, _version=None, name=None, latitude=None, longitude=None):
@@ -169,7 +180,7 @@ class Location(object):
         return "Location{" + "id='" + self.id + '\'' + ", version=" + self.version + ", name='" + self.name + '\'' + ", latitude='" + self.latitude + '\'' + ", longitude='" + self.longitude + '\'' + '}'
 
 
-class VimInstance(object):
+class VimInstance(_BaseObject):
     """ generated source for class VimInstance """
 
     def __init__(self, _id: str = None, _version: int = None, name: str = None, auth_url: str = None,
@@ -197,21 +208,35 @@ class VimInstance(object):
     def __str__(self):
         """ generated source for method toString """
         return "VimInstance{" + "id='" + self.id + '\'' + ", version=" + str(
-            self.version) + ", name='" + self.name + '\'' + ", authUrl='" + self.authUrl + '\'' + ", tenant='" + self.tenant + '\'' + ", username='" + self.username + '\'' + ", password='************'" + ", keyPair='" + self.keyPair + '\'' + ", location=" + str(self.location) + ", securityGroups=" + str(
+            self.version) + ", name='" + self.name + '\'' + ", authUrl='" + self.authUrl + '\'' + ", tenant='" + self.tenant + '\'' + ", username='" + self.username + '\'' + ", password='************'" + ", keyPair='" + self.keyPair + '\'' + ", location=" + str(
+            self.location) + ", securityGroups=" + str(
             self.securityGroups) + ", flavours=" + str(
             self.flavours) + ", type='" + self.type + '\'' + ", images=" + str(self.images) + ", networks=" + str(
             self.networks) + ", projectId='" + self.projectId + '\'' + ", active=" + str(self.active) + '}'
 
+    def get_dict(self):
+        _dict = self.__dict__
+        _dict['location'] = self.location.__dict__
+        return _dict
 
-class Server(object):
+
+class Server(_BaseObject):
     """ generated source for class Server """
 
-    def __init__(self, _id: str = None, _version: int = None, name: str = None, image: NFVImage = None,
+    def __init__(self, _id: str = None,
+                 _version: int = None,
+                 name: str = None,
+                 image: NFVImage = None,
                  flavor: DeploymentFlavour = None,
-                 status: str = None, extendend_status: str = None, ext_id: str = None, ips: dict = None,
+                 status: str = None,
+                 extended_status: str = None,
+                 ext_id: str = None,
+                 ips: dict = None,
                  floating_ips: dict = None,
                  created: date = None,
-                 updated: date = None, hostname: str = None, hypervisor_host_name: str = None,
+                 updated: date = None,
+                 hostname: str = None,
+                 hypervisor_host_name: str = None,
                  instance_name: str = None):
         self.id = _id
         self.version = _version
@@ -219,7 +244,7 @@ class Server(object):
         self.image = image
         self.flavor = flavor
         self.status = status
-        self.extendedStatus = extendend_status
+        self.extendedStatus = extended_status
         self.extId = ext_id
         self.ips = ips  # dict
         self.floatingIps = floating_ips
@@ -233,13 +258,24 @@ class Server(object):
         """ generated source for method toString """
         return "Server{" + "id='" + self.id + '\'' + ", version=" + str(
             self.version) + ", name='" + self.name + '\'' + ", image=" + str(self.image) + ", flavor=" + str(
-            self.flavor) + ", status='" + self.status + '\'' + ", extendedStatus='" + self.extendedStatus + '\'' + ", extId='" + self.extId + '\'' + ", ips=" + str(self.ips) + ", floatingIps=" + str(self.floatingIps) + ", created=" + str(self.created) + ", updated=" + str(self.updated) + ", hostName='" + self.hostName + '\'' + ", hypervisorHostName='" + self.hypervisorHostName + '\'' + ", instanceName='" + self.instanceName + '\'' + '}'
+            self.flavor) + ", status='" + self.status + '\'' + ", extendedStatus='" + self.extendedStatus + '\'' + ", extId='" + self.extId + '\'' + ", ips=" + str(
+            self.ips) + ", floatingIps=" + str(self.floatingIps) + ", created=" + str(
+            self.created) + ", updated=" + str(
+            self.updated) + ", hostName='" + self.hostName + '\'' + ", hypervisorHostName='" + self.hypervisorHostName + '\'' + ", instanceName='" + self.instanceName + '\'' + '}'
+
+    def get_dict(self):
+        _dict = self.__dict__
+        _dict['image'] = self.image.__dict__
+        _dict['falvor'] = self.flavor.__dict__
+        return _dict
 
 
-class Quota(object):
+class Quota(_BaseObject):
     """ generated source for class Quota """
-    def __init__(self, _id:str=None, _version:int=None, tenant:str=None, cores:int=None, floating_ips:int=None,
-                 instances:int=None, keypairs:int=None, ram:int=None):
+
+    def __init__(self, _id: str = None, _version: int = None, tenant: str = None, cores: int = None,
+                 floating_ips: int = None,
+                 instances: int = None, keypairs: int = None, ram: int = None):
         self.id = _id
         self.version = _version
         self.tenant = tenant
@@ -249,8 +285,6 @@ class Quota(object):
         self.keyPairs = keypairs
         self.ram = ram
 
-
     def __str__(self):
         """ generated source for method toString """
         return "Quota{" + "id='" + self.id + '\'' + ", version=" + self.version + ", tenant='" + self.tenant + '\'' + ", cores='" + self.cores + '\'' + ", floatingIps='" + self.floatingIps + '\'' + ", instances='" + self.instances + '\'' + ", keypairs='" + self.keyPairs + '\'' + ", ram='" + self.ram + '\'' + '}'
-

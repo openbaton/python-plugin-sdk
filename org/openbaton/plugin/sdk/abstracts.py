@@ -52,6 +52,7 @@ class AbstractPluginHelper(threading.Thread):
 
     def __on_request__(self, ch, method, props, body):
         response = self.__on_message__(body)
+        # log.debug("Answer is \n\n%s" % response)
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
         if response:
@@ -75,7 +76,7 @@ class AbstractPluginHelper(threading.Thread):
         try:
             ret_obj = method(*params)
             if not isinstance(ret_obj,dict) and not isinstance(ret_obj,list):
-                answer['answer'] = ret_obj.__dict__
+                answer['answer'] = ret_obj.get_dict()
             elif isinstance(ret_obj, list):
                 answer['answer'] = []
                 for obj in ret_obj:
@@ -83,7 +84,8 @@ class AbstractPluginHelper(threading.Thread):
                         answer['answer'] = ret_obj
                         break
                     else:
-                        answer['answer'].append(obj.__dict__)
+                        json_obj = obj.get_dict()
+                        answer['answer'].append(json_obj)
             else:
                 answer['answer'] = ret_obj
 
