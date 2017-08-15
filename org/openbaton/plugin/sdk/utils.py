@@ -132,6 +132,7 @@ def get_rabbit_plugin_credentials(_type, broker_ip="localhost", port=5672, usern
         response = response.decode("utf-8")
 
     response_dict = json.loads(response)
+    channel.queue_delete(queue=callback_queue)
     return response_dict.get('rabbitUsername'), response_dict.get('rabbitPassword')
 
 
@@ -144,7 +145,7 @@ def unregister_plugin(username, password, broker_ip="localhost", port=5672, hear
                                                                    heartbeat_interval=int(heartbeat)))
 
     channel = connection.channel()
-    unregister_message = json.dumps(dict(username="vim-drivers.%s.%s" % (username, username),
+    unregister_message = json.dumps(dict(username=username,
                                          password=password,
                                          action="unregister"))
     channel.basic_publish(

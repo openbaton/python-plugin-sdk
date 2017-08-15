@@ -49,6 +49,7 @@ class AbstractPluginHelper(threading.Thread):
         self.queue_name = "vim-drivers.%s.%s" % (self.type, self.plugin_name)
 
         self.rabbit_credentials = pika.PlainCredentials(username, password)
+        self.channel = None
 
     def __on_request__(self, ch, method, props, body):
         response = self.__on_message__(body)
@@ -58,7 +59,8 @@ class AbstractPluginHelper(threading.Thread):
         if response:
             ch.basic_publish(exchange='',
                              routing_key=props.reply_to,
-                             properties=pika.BasicProperties(correlation_id=props.correlation_id),
+                             properties=pika.BasicProperties(correlation_id=props.correlation_id,
+                                                             content_type='text/plain'),
                              body=response)
             # ch.basic_ack(delivery_tag=method.delivery_tag)
             log.info("Answer sent")
@@ -75,7 +77,9 @@ class AbstractPluginHelper(threading.Thread):
         answer = {}
         try:
             ret_obj = method(*params)
-            if not isinstance(ret_obj,dict) and not isinstance(ret_obj,list):
+            if not ret_obj:
+                return ret_obj
+            if not isinstance(ret_obj, dict) and not isinstance(ret_obj, list):
                 answer['answer'] = ret_obj.get_dict()
             elif isinstance(ret_obj, list):
                 answer['answer'] = []
@@ -95,7 +99,7 @@ class AbstractPluginHelper(threading.Thread):
         return json.dumps(answer)
 
     def _set_stop(self):
-        self._stop_running = True
+        self.channel.stop_consuming()
 
     def __thread_function__(self, ch, method, properties, body):
         threading.Thread(target=self.__on_request__, args=(ch, method, properties, body)).start()
@@ -106,15 +110,18 @@ class AbstractPluginHelper(threading.Thread):
             pika.ConnectionParameters(host=self.properties.get("broker_ip"), credentials=self.rabbit_credentials,
                                       heartbeat_interval=int(self.heartbeat)))
 
-        channel = connection.channel()
-        channel.basic_qos(prefetch_count=1)
+        self.channel = connection.channel()
+        self.channel.basic_qos(prefetch_count=1)
 
-        channel.queue_declare(queue=self.queue_name,
-                              auto_delete=self.queuedel,
-                              durable=self.durable)
-        channel.queue_bind(exchange=self.exchange_name, queue=self.queue_name)
-        channel.basic_consume(self.__thread_function__, no_ack=False, queue=self.queue_name)
+        self.channel.queue_declare(queue=self.queue_name,
+                                   auto_delete=self.queuedel,
+                                   durable=self.durable)
+        self.channel.queue_bind(exchange=self.exchange_name, queue=self.queue_name)
+        self.channel.basic_consume(self.__thread_function__, no_ack=False, queue=self.queue_name)
 
         log.info("Waiting for actions")
 
-        channel.start_consuming()
+        # Pika is bugged
+        # self.channel.start_consuming()
+        while self.channel._consumer_infos:
+            self.channel.connection.process_data_events(time_limit=1)

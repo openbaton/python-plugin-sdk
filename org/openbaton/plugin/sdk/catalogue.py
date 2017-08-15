@@ -18,7 +18,6 @@
 #  *
 #  
 # package: org.openbaton.catalogue.nfvo
-import json
 from datetime import date
 
 
@@ -134,7 +133,10 @@ class Network(_BaseObject):
 
     def get_dict(self):
         _dict = self.__dict__
-        _dict['subnets'] = [sub.__dict__ for sub in self.subnets]
+        if self.subnets:
+            _dict['subnets'] = [sub.__dict__ for sub in self.subnets]
+        else:
+            _dict.pop('subnets', None)
         return _dict
 
 
@@ -216,7 +218,10 @@ class VimInstance(_BaseObject):
 
     def get_dict(self):
         _dict = self.__dict__
-        _dict['location'] = self.location.__dict__
+        if self.location:
+            _dict['location'] = self.location.__dict__
+        else:
+            _dict.pop('location', None)
         return _dict
 
 
@@ -265,8 +270,14 @@ class Server(_BaseObject):
 
     def get_dict(self):
         _dict = self.__dict__
-        _dict['image'] = self.image.__dict__
-        _dict['falvor'] = self.flavor.__dict__
+        if self.image:
+            _dict['image'] = self.image.__dict__
+        else:
+            _dict.pop('image', None)
+        if self.flavor:
+            _dict['flavor'] = self.flavor.__dict__
+        else:
+            _dict.pop('flavor', None)
         return _dict
 
 
