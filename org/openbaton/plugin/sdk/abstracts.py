@@ -77,7 +77,10 @@ class AbstractPluginHelper(threading.Thread):
         answer = {}
         try:
             ret_obj = method(*params)
-            if not ret_obj:
+            if isinstance(ret_obj, list):
+                if len(ret_obj) == 0:
+                    answer['answer'] = json.dumps(ret_obj)
+            elif not ret_obj:
                 return ret_obj
             if not isinstance(ret_obj, dict) and not isinstance(ret_obj, list):
                 answer['answer'] = ret_obj.get_dict()
