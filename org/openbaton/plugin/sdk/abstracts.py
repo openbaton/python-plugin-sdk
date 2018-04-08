@@ -85,11 +85,12 @@ class AbstractPluginHelper(threading.Thread):
                 answer['answer'] = []
                 for obj in ret_obj:
                     if type(obj) in (int, float, bool, str, date, dict):
-                        answer['answer'] = ret_obj
-                        break
+                        answer.get('answer').append(obj)
+                        # answer['answer'] = ret_obj
+                        # break
                     else:
                         json_obj = obj.get_dict()
-                        answer['answer'].append(json_obj)
+                        answer.get('answer').append(json_obj)
             else:
                 answer['answer'] = ret_obj
 

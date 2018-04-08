@@ -23,7 +23,7 @@ from datetime import date
 
 class _BaseObject(object):
     def get_dict(self):
-        return self.__dict__
+        return dict(self.__dict__)
 
 
 class ImageStatus:
@@ -92,6 +92,18 @@ class NFVImage(_BaseObject):
                ", created='" + created_isoformat + '\'' + \
                ", updated='" + updated_isoformat + '\'' + '}'
 
+    def get_dict(self):
+        _dict = dict(self.__dict__)
+        if self.created is not None:
+            _dict['created'] = self.created.isoformat()
+        else:
+            _dict.pop('created', None)
+        if self.updated is not None:
+            _dict['updated'] = self.updated.isoformat()
+        else:
+            _dict.pop('updated', None)
+        return _dict
+
 
 class Subnet(_BaseObject):
     """ generated source for class Subnet """
@@ -132,9 +144,9 @@ class Network(_BaseObject):
                ", shared=" + str(self.shared) + ", subnets=" + str(self.subnets) + '}'
 
     def get_dict(self):
-        _dict = self.__dict__
-        if self.subnets:
-            _dict['subnets'] = [sub.__dict__ for sub in self.subnets]
+        _dict = dict(self.__dict__)
+        if self.subnets is not None:
+            _dict['subnets'] = [sub.get_dict() for sub in self.subnets]
         else:
             _dict.pop('subnets', None)
         return _dict
@@ -144,8 +156,7 @@ class DeploymentFlavour(_BaseObject):
     """ generated source for class DeploymentFlavour """
 
     def __init__(self, _id: str = None, _version: int = None, flavour_key: str = None, ext_id: str = None,
-                 ram: int = None,
-                 disk: int = None, vcpu: int = None):
+                 ram: int = None, disk: int = None, vcpu: int = None):
         # ID of the deployment flavour.
         self.id = _id
         self.version = _version
@@ -170,7 +181,8 @@ class DeploymentFlavour(_BaseObject):
 class Location(_BaseObject):
     """ generated source for class Location """
 
-    def __init__(self, _id=None, _version=None, name=None, latitude=None, longitude=None):
+    def __init__(self, _id: str = None, _version: int = None, name: str = None, latitude: str = None,
+                 longitude: str = None):
         self.id = _id
         self.version = _version
         self.name = name
@@ -217,11 +229,23 @@ class VimInstance(_BaseObject):
             self.networks) + ", projectId='" + self.projectId + '\'' + ", active=" + str(self.active) + '}'
 
     def get_dict(self):
-        _dict = self.__dict__
-        if self.location:
-            _dict['location'] = self.location.__dict__
+        _dict = dict(self.__dict__)
+        if self.location is not None:
+            _dict['location'] = self.location.get_dict()
         else:
             _dict.pop('location', None)
+        if self.flavours is not None:
+            _dict['flavours'] = [flavour.get_dict() for flavour in self.flavours]
+        else:
+            _dict.pop('flavours', None)
+        if self.images is not None:
+            _dict['images'] = [image.get_dict() for image in self.images]
+        else:
+            _dict.pop('images', None)
+        if self.networks is not None:
+            _dict['networks'] = [net.get_dict() for net in self.networks]
+        else:
+            _dict.pop('networks', None)
         return _dict
 
 
@@ -269,15 +293,23 @@ class Server(_BaseObject):
             self.updated) + ", hostName='" + self.hostName + '\'' + ", hypervisorHostName='" + self.hypervisorHostName + '\'' + ", instanceName='" + self.instanceName + '\'' + '}'
 
     def get_dict(self):
-        _dict = self.__dict__
+        _dict = dict(self.__dict__)
         if self.image:
-            _dict['image'] = self.image.__dict__
+            _dict['image'] = self.image.get_dict()
         else:
             _dict.pop('image', None)
         if self.flavor:
-            _dict['flavor'] = self.flavor.__dict__
+            _dict['flavor'] = self.flavor.get_dict()
         else:
             _dict.pop('flavor', None)
+        if self.created is not None:
+            _dict['created'] = self.created.isoformat()
+        else:
+            _dict.pop('created', None)
+        if self.updated is not None:
+            _dict['updated'] = self.updated.isoformat()
+        else:
+            _dict.pop('updated', None)
         return _dict
 
 
@@ -285,8 +317,7 @@ class Quota(_BaseObject):
     """ generated source for class Quota """
 
     def __init__(self, _id: str = None, _version: int = None, tenant: str = None, cores: int = None,
-                 floating_ips: int = None,
-                 instances: int = None, keypairs: int = None, ram: int = None):
+                 floating_ips: int = None, instances: int = None, keypairs: int = None, ram: int = None):
         self.id = _id
         self.version = _version
         self.tenant = tenant
