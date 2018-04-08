@@ -43,20 +43,28 @@ class VimDriver(AbstractPluginHelper):
         """ generated source for method launchInstance """
 
     @abstractmethod
-    def list_images(self, vim_instance: dict) -> [NFVImage]:
-        """ generated source for method listImages """
-
-    @abstractmethod
     def list_server(self, vim_instance: dict) -> [Server]:
         """ generated source for method listServer """
+
+    @abstractmethod
+    def rebuild_server(self, vim_instance: dict, server_id: str, image_id: str) -> Server:
+        """ generated source for method rebuildServer """
 
     @abstractmethod
     def list_networks(self, vim_instance: dict) -> [Network]:
         """ generated source for method listNetworks """
 
     @abstractmethod
+    def list_images(self, vim_instance: dict) -> [NFVImage]:
+        """ generated source for method listImages """
+
+    @abstractmethod
     def list_flavors(self, vim_instance: dict) -> [DeploymentFlavour]:
         """ generated source for method listFlavors """
+
+    @abstractmethod
+    def refresh(self, vim_instance: dict) -> dict:
+        """ generated source for method refresh """
 
     @abstractmethod
     def launch_instance_and_wait(self,
