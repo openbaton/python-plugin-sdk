@@ -43,7 +43,7 @@ def convert_from_camel_to_snake(string):
 
 
 def start_vim_driver(vim_driver_class, config_file, number_maximum_worker_threads, number_listener_threads,
-                     number_reply_threads, vim_driver_type, vim_driver_name):
+                     number_reply_threads, vim_driver_type, vim_driver_name, *vim_driver_args):
     log.debug("Config file location: %s" % config_file)
     config = config_parser.ConfigParser()
     config.read(config_file)
@@ -61,7 +61,7 @@ def start_vim_driver(vim_driver_class, config_file, number_maximum_worker_thread
 
     reply_queue = Queue()
     stop_event = threading.Event()
-    worker_pool = WorkerPool(reply_queue, vim_driver_class, number_maximum_worker_threads)
+    worker_pool = WorkerPool(reply_queue, vim_driver_class, number_maximum_worker_threads, *vim_driver_args)
     listener_threads = [ListenerThread(vim_driver_class, worker_pool, broker_ip, rabbit_port, heartbeat, exchange_name,
                                        rabbit_credentials, vim_driver_type, vim_driver_name) for _ in
                         range(number_listener_threads)]
