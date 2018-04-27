@@ -19,7 +19,7 @@ try:
 except ImportError:
     import ConfigParser as config_parser  # py2
 
-log = logging.getLogger("org.openbaton.python.vnfm.sdk.%s" % __name__)
+log = logging.getLogger(__name__)
 registration_response = registration_corr_id = None
 
 

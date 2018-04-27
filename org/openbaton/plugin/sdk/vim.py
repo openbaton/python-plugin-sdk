@@ -21,7 +21,7 @@ from abc import abstractmethod, ABCMeta
 from org.openbaton.plugin.sdk.abstracts import AbstractVimDriver
 from org.openbaton.plugin.sdk.catalogue import Server, NFVImage, Network, DeploymentFlavour, Subnet, Quota
 
-log = logging.getLogger("org.openbaton.plguin.vim.sdk.%s" % __name__)
+log = logging.getLogger(__name__)
 
 
 def is_vim_driver_subclass(clazz):
