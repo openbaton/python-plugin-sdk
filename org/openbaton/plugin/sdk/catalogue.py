@@ -16,7 +16,7 @@
 #  * See the License for the specific language governing permissions and
 #  * limitations under the License.
 #  *
-#  
+#
 # package: org.openbaton.catalogue.nfvo
 from enum import Enum
 
@@ -183,8 +183,35 @@ class Location(_BaseObject):
                ", name='" + str(self.name) + '\'' + ", latitude='" + str(self.latitude) + '\'' + \
                ", longitude='" + str(self.longitude) + '\'' + '}'
 
+class AvailabilityZone(_BaseObject):
+    def __init__(self, _id: str = None, _version: int = None, name: str = None, available: bool = None, hosts: dict = {}):
+        self.id = _id
+        self.version = _version
+        self.name = name
+        self.available = available
+        self.hosts = hosts
 
-class VimInstance(_BaseObject):
+    def __str__(self):
+        return "AvailabilityZone{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
+               ", name='" + str(self.name) + '\'' + ", available=" + str(self.available) + \
+               ", hosts=" + str(self.hosts) + '}'
+
+class PopKeypair(_BaseObject):
+    def __init__(self, _id: str = None, _version: int = None, name: str = None, public_key: str = None, fingerprint: str = None):
+        self.id = _id
+        self.version = _version
+        self.name = name
+        self.publicKey = public_key
+        self.fingerprint = fingerprint
+
+    def __str__(self):
+        return "AvailabilityZone{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
+               ", name='" + str(self.name) + '\'' + ", publicKey='" + str(self.publicKey) + \
+               "', fingerprint='" + str(self.fingerprint) + '\'}'
+
+
+
+class BaseVimInstance(_BaseObject):
     """ generated source for class VimInstance """
 
     def __init__(self, _id: str = None, _version: int = None, name: str = None, auth_url: str = None,
@@ -196,29 +223,19 @@ class VimInstance(_BaseObject):
         self.version = _version
         self.name = name
         self.authUrl = auth_url
-        self.tenant = tenant
-        self.username = username
-        self.password = password
-        self.keyPair = key_pair
         self.location = location
-        self.securityGroups = security_groups
-        self.flavours = flavours
         self.type = _type
         self.images = images
         self.networks = networks
-        self.projectId = project_id
         self.active = active
 
     def __str__(self):
         """ generated source for method toString """
         return "VimInstance{" + "id='" + str(self.id) + '\'' + ", version=" + str(
             self.version) + ", name='" + str(self.name) + '\'' + ", authUrl='" + str(self.authUrl) + '\'' + \
-            ", tenant='" + str(self.tenant) + '\'' + ", username='" + str(self.username) + '\'' + \
-            ", password='************'" + ", keyPair='" + str(self.keyPair) + '\'' + ", location=" + str(
-            self.location) + ", securityGroups=" + str(self.securityGroups) + ", flavours=" + str(
-            [str(f) for f in self.flavours if self.flavours]) + ", type='" + str(self.type) + '\'' + \
+            ", location=" + str(self.location) + ", type='" + str(self.type) + '\'' + \
             ", images=" + str(self.images) + ", networks=" + str([str(n) for n in self.networks if self.networks]) + \
-            ", projectId='" + str(self.projectId) + '\'' + ", active=" + str(self.active) + '}'
+            ", active=" + str(self.active) + '}'
 
     def get_dict(self):
         _dict = dict(self.__dict__)
@@ -226,10 +243,6 @@ class VimInstance(_BaseObject):
             _dict['location'] = self.location.get_dict()
         else:
             _dict.pop('location', None)
-        if self.flavours is not None:
-            _dict['flavours'] = [flavour.get_dict() for flavour in self.flavours]
-        else:
-            _dict.pop('flavours', None)
         if self.images is not None:
             _dict['images'] = [image.get_dict() for image in self.images]
         else:
@@ -240,6 +253,51 @@ class VimInstance(_BaseObject):
             _dict.pop('networks', None)
         return _dict
 
+class OpenstackVimInstance(BaseVimInstance):
+    def __init__(self, _id: str = None, _version: int = None, name: str = None, auth_url: str = None,
+                 tenant: str = None, username: str = None, password: str = None,
+                 key_pair: str = None, location: Location = None, security_groups: list = None, flavours: [DeploymentFlavour] = [],
+                 _type: str = None, images: list = None, networks: [Network] = [], zones: [AvailabilityZone] = [],
+                 project_id: str = None, active: bool = None):
+        super(OpenstackVimInstance, self).__init__(_id=_id, _version=_version, name=name, auth_url=auth_url, images=images,
+                                                   networks=networks, location=location, type=_type, active=active)
+
+        self.tenant = tenant
+        self.username = username
+        self.password = password
+        self.keyPair = key_pair
+        self.securityGroups = security_groups
+        self.flavours = flavours
+        self.projectId = project_id
+        self.zones = zones
+
+    def __str__(self):
+        """ generated source for method toString """
+        return "VimInstance{" + "id='" + str(self.id) + '\'' + ", version=" + str(
+            self.version) + ", name='" + str(self.name) + '\'' + ", authUrl='" + str(self.authUrl) + '\'' + \
+            ", tenant='" + str(self.tenant) + '\'' + ", username='" + str(self.username) + '\'' + \
+            ", password='************'" + ", keyPair='" + str(self.keyPair) + '\'' + ", location=" + str(
+            self.location) + ", securityGroups=" + str(self.securityGroups) + ", flavours=" + str(
+            [str(f) for f in self.flavours if self.flavours]) + ", zones=" + str([str(z) for z in self.zones if self.zones]) + \
+            ", type='" + str(self.type) + '\'' + ", images=" + str(self.images) + ", networks=" + \
+            str([str(n) for n in self.networks if self.networks]) + ", projectId='" + str(self.projectId) + '\'' + \
+            ", active=" + str(self.active) + '}'
+
+    def get_dict(self):
+        _super_dict = super(BaseVimInstance, self).get_dict()
+        _dict = dict(self.__dict__)
+        if self.flavours is not None:
+            _dict['flavours'] = [flavour.get_dict() for flavour in self.flavours]
+        else:
+            _dict.pop('flavours', None)
+        for key in _super_dict:
+            value = _dict.get(key)
+            # if the value is not a primitive type or a list of primitive types overwrite the value in _dict with the value from _super_dict
+            if value is None or (type(value) in (dict, str, int, bool) or
+                 (type(value) == list and (len(value)==0 or type(value[0]) in (dict, str, int, bool)))):
+                continue
+            _dict[key] = _super_dict.get(key)
+        return _dict
 
 class Server(_BaseObject):
     """ generated source for class Server """
@@ -317,3 +375,4 @@ class Quota(_BaseObject):
                str(self.tenant) + '\'' + ", cores='" + str(self.cores) + '\'' + ", floatingIps='" + \
                str(self.floatingIps) + '\'' + ", instances='" + str(self.instances) + '\'' + ", keypairs='" + \
                str(self.keyPairs) + '\'' + ", ram='" + str(self.ram) + '\'' + '}'
+

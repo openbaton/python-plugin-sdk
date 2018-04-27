@@ -18,7 +18,7 @@ from abc import abstractmethod, ABCMeta
 #
 #
 # package: org.openbaton.vim.drivers.interfaces
-from org.openbaton.plugin.sdk.abstracts import AbstractPluginHelper
+from org.openbaton.plugin.sdk.abstracts import AbstractVimDriver
 from org.openbaton.plugin.sdk.catalogue import Server, NFVImage, Network, DeploymentFlavour, Subnet, Quota
 
 log = logging.getLogger("org.openbaton.plguin.vim.sdk.%s" % __name__)
@@ -28,7 +28,7 @@ def is_vim_driver_subclass(clazz):
     return issubclass(clazz, VimDriver)
 
 
-class VimDriver(AbstractPluginHelper):
+class VimDriver(AbstractVimDriver):
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -69,9 +69,9 @@ class VimDriver(AbstractPluginHelper):
     @abstractmethod
     def launch_instance_and_wait(self,
                                  vim_instance: dict,
-                                 hostname: str,
+                                 instance_name: str,
                                  image: str,
-                                 ext_id: str,
+                                 flavor: str,
                                  key_pair: str,
                                  networks: [dict],
                                  security_groups: [str],
@@ -151,3 +151,4 @@ class VimDriver(AbstractPluginHelper):
     @abstractmethod
     def get_type(self, vim_instance: dict) -> str:
         """ generated source for method getType """
+
