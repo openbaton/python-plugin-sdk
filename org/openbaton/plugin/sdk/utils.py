@@ -23,18 +23,21 @@ log = logging.getLogger(__name__)
 registration_response = registration_corr_id = None
 
 
-def get_map(section, config):
-    dict1 = {}
-    options = config.options(section)
+def get_map(section, config_parser):
+    conf_dict = {}
+    try:
+        options = config_parser.options(section)
+    except:
+        log.warning('No section \'{}\' in configuration'.format(section))
+        return conf_dict
     for option in options:
         try:
-            dict1[option] = config.get(section, option)
-            if dict1[option] == -1:
-                log.debug(("skip: %s" % option))
+            value = config_parser.get(section, option)
+            if value != '':
+                conf_dict[option] = value
         except:
-            log.debug(("exception on %s!" % option))
-            dict1[option] = None
-    return dict1
+            log.warning('Exception on configuration entry: {}'.format(option))
+    return conf_dict
 
 
 def convert_from_camel_to_snake(string):
@@ -47,9 +50,9 @@ def start_vim_driver(vim_driver_class, config_file, number_maximum_worker_thread
     log.debug("Config file location: %s" % config_file)
     config = config_parser.ConfigParser()
     config.read(config_file)
-    props = get_map(section='vim', config=config)
-    rabbit_uname = props.get('username')
-    rabbit_pwd = props.get('password')
+    props = get_map(section='rabbitmq', config_parser=config)
+    rabbit_uname = props.get('username', 'openbaton-manager-user')
+    rabbit_pwd = props.get('password', 'openbaton')
     broker_ip = props.get('broker_ip', '127.0.0.1')
     rabbit_port = props.get('port', 5672)
     heartbeat = int(props.get('heartbeat', 60))
@@ -61,10 +64,13 @@ def start_vim_driver(vim_driver_class, config_file, number_maximum_worker_thread
 
     reply_queue = Queue()
     stop_event = threading.Event()
+    log.debug('Creating worker pool with a maximum of {} threads'.format(number_maximum_worker_threads))
     worker_pool = WorkerPool(reply_queue, vim_driver_class, number_maximum_worker_threads, *vim_driver_args)
+    log.debug('Creating {} listener threads'.format(number_listener_threads))
     listener_threads = [ListenerThread(vim_driver_class, worker_pool, broker_ip, rabbit_port, heartbeat, exchange_name,
                                        rabbit_credentials, vim_driver_type, vim_driver_name) for _ in
                         range(number_listener_threads)]
+    log.debug('Creating {} reply threads'.format(number_reply_threads))
     reply_threads = [ReplyThread(broker_ip, rabbit_port, rabbit_credentials, exchange_name,
                                  heartbeat, reply_queue) for _ in range(number_reply_threads)]
     stop_signal_handler = StopSignalHandler(stop_event)
@@ -94,6 +100,8 @@ def start_vim_driver(vim_driver_class, config_file, number_maximum_worker_thread
     log.debug('Worker threads stopped')
 
     reply_queue.join()
+
+    log.debug('No reply messages left in reply queue')
 
     for t in reply_threads:
         t.stop_running = True
@@ -142,8 +150,11 @@ class WorkerPool():
     def shutdown(self):
         with self.lock:
             self.stopped = True
-        for t in self.threads:
-            t.join()
+        number_worker_threads = len(self.threads)
+        log.debug('Joining {} worker threads'.format(number_worker_threads))
+        for i in range(number_worker_threads):
+            self.threads[i].join()
+            log.debug('Joined {}/{} worker threads'.format(i+1, number_worker_threads))
 
 
 class WorkerThread(threading.Thread):
@@ -166,12 +177,13 @@ class WorkerThread(threading.Thread):
 
 
 def register_vim_driver(broker_ip, rabbit_port, rabbit_uname, rabbit_pwd, exchange_name, heartbeat, vim_driver_type):
+    log.info('Register VIM Driver')
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=broker_ip,
                                                                    port=rabbit_port,
                                                                    credentials=pika.PlainCredentials(rabbit_uname,
                                                                                                      rabbit_pwd),
                                                                    heartbeat_interval=heartbeat))
-
+    log.debug('Connection established')
     channel = connection.channel()
     channel.exchange_declare(exchange=exchange_name, passive=True)
     channel.basic_qos(prefetch_count=1)
@@ -215,6 +227,7 @@ def register_vim_driver(broker_ip, rabbit_port, rabbit_uname, rabbit_pwd, exchan
 
     response_dict = json.loads(registration_response)
     channel.queue_delete(queue=callback_queue)
+    log.debug('VIM Driver registration successful')
     return response_dict.get('rabbitUsername'), response_dict.get('rabbitPassword')
 
 
@@ -281,7 +294,7 @@ class ListenerThread(threading.Thread):
 
     def run(self):
         """Start the message dispatcher."""
-        log.debug("Connecting to %s" % self.broker_ip)
+        log.debug('Starting listener thread')
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=self.broker_ip, credentials=self.rabbit_credentials,
                                       heartbeat_interval=self.heartbeat))
@@ -306,7 +319,7 @@ class ListenerThread(threading.Thread):
         self.connection.close()
 
     def dispatch(self, ch, method, props, body):
-        log.debug('Dispatching message')
+        log.debug('Listener thread tries to submit incoming message to worker pool')
         self.channel.basic_ack(delivery_tag=method.delivery_tag)
         while True:
             try:
@@ -314,7 +327,7 @@ class ListenerThread(threading.Thread):
                 break
             except NoWorkerAvailable:
                 time.sleep(0.2)
-        log.debug('Message dispatched')
+        log.debug('Message has been submitted to the worker pool by the listener thread')
 
 
 class ReplyThread(threading.Thread):
@@ -331,6 +344,7 @@ class ReplyThread(threading.Thread):
         self.stop_running = False
 
     def run(self):
+        log.debug('Starting reply thread')
         try:
             while not self.stop_running:
                 reply_to, corr_id, response = self.reply_queue.get()
@@ -338,24 +352,28 @@ class ReplyThread(threading.Thread):
                     self.reply_queue.task_done()
                     break
                 try:
+                    log.debug('Sending reply to NFVO')
                     self.channel.basic_publish(exchange=self.exchange_name, routing_key=reply_to,
                                                properties=pika.BasicProperties(correlation_id=corr_id,
                                                                                content_type='text/plain'),
                                                body=response)
+                    log.debug('Successfully sent reply')
                 except pika.exceptions.ConnectionClosed:
-                    log.warning('Pika connection closed. Heartbeat is probably too low. \
-                                    Trying to connect and send message again.')
-                    self.connection, self.channel = connect_to_rabbitmq(self.broker_ip, self.rabbit_port,
-                                                                        self.rabbit_credentials,
-                                                                        self.exchange_name, None)
-                    self.channel.basic_publish(exchange=self.exchange_name, routing_key=reply_to,
-                                               properties=pika.BasicProperties(correlation_id=corr_id,
-                                                                               content_type='text/plain'),
-                                               body=response)
+                    log.warning(
+                        'Pika connection closed. Heartbeat is probably too low. Trying to connect and send message again.')
+                    try:
+                        self.connection, self.channel = connect_to_rabbitmq(self.broker_ip, self.rabbit_port,
+                                                                            self.rabbit_credentials,
+                                                                            self.exchange_name, None)
+                        self.channel.basic_publish(exchange=self.exchange_name, routing_key=reply_to,
+                                                   properties=pika.BasicProperties(correlation_id=corr_id,
+                                                                                   content_type='text/plain'),
+                                                   body=response)
+                        log.debug('Successfully sent reply')
+                    except Exception as e:
+                        log.error('Also the second attempt to send the reply to the NFVO failed. Reply message will be discarded: {}'.format(e))
                 finally:
                     self.reply_queue.task_done()
-
-                log.info("Answer sent")
         finally:
             try:
                 self.channel.close()
@@ -370,9 +388,10 @@ class StopSignalHandler():
         self.already_stopping = False
 
     def __call__(self, signum, frame):
+        log.debug('Received SIGINT')
         if not self.already_stopping:
             self.already_stopping = True
             self.stop_event.set()
         else:
+            log.debug('Exiting ungracefully')
             sys.exit()
-
