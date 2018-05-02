@@ -49,6 +49,6 @@ class AbstractVimDriver():
 
         except Exception as e:
             traceback.print_exc()
-            answer['exception'] = str(e)
+            answer['exception'] = {'detailMessage':str(e)}
         return json.dumps(answer)
 
