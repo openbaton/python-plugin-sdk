@@ -58,8 +58,11 @@ def start_vim_driver(vim_driver_class, config_file, number_maximum_worker_thread
     heartbeat = int(props.get('heartbeat', 60))
     exchange_name = props.get('exchange-name', 'openbaton-exchange')
 
-    vim_driver_uname, vim_driver_pwd = register_vim_driver(broker_ip, rabbit_port, rabbit_uname, rabbit_pwd,
+    try:
+        vim_driver_uname, vim_driver_pwd = register_vim_driver(broker_ip, rabbit_port, rabbit_uname, rabbit_pwd,
                                                            exchange_name, heartbeat, vim_driver_type)
+    except KeyboardInterrupt:
+        return
     rabbit_credentials = pika.PlainCredentials(vim_driver_uname, vim_driver_pwd)
 
     reply_queue = Queue()
