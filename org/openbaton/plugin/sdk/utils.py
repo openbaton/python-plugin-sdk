@@ -47,6 +47,25 @@ def convert_from_camel_to_snake(string):
 
 def start_vim_driver(vim_driver_class, config_file, number_maximum_worker_threads, number_listener_threads,
                      number_reply_threads, vim_driver_type, vim_driver_name, *vim_driver_args):
+    """
+    This class starts the VIM Driver.
+
+    :param vim_driver_class: the VIM driver class which inherits org.openbaton.plugin.sdk.vim.VimDriver and implements its abstract methods
+    :param config_file: the path to the configuration file
+    :type config_file: str
+    :param number_maximum_worker_threads: the maximum number of worker threads that can be spawned. a number smaller than one means infinite
+    :type number_maximum_worker_threads: int
+    :param number_listener_threads: the number of threads that are continuously listening for RabbitMQ messages from the NFVO
+    :type number_listener_threads: int
+    :param number_reply_threads: the number of threads that send messages back to the NFVO
+    :type number_reply_threads: int
+    :param vim_driver_type: the type of the VIM Driver
+    :type vim_driver_type: str
+    :param vim_driver_name: the name of the VIM Driver
+    :type vim_driver_name: str
+    :param vim_driver_args: arguments that will be passed to the vim_driver_class when it is instantiated
+    :return:
+    """
     log.debug("Config file location: %s" % config_file)
     if number_listener_threads <= 0:
         log.warning('The passed number of listener threads is {} but it has to be a positive number. One listener thread will be started'.format(number_listener_threads))

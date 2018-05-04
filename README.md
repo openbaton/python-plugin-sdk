@@ -4,7 +4,7 @@
   Licensed under [Apache v2 License](http://www.apache.org/licenses/LICENSE-2.0).
 
 # Python version of the plugin-sdk
-This project contains a vnfm sdk for python projects.
+This project contains a Python SDK for writing VIM Drivers for Open Baton.
 
 ## Technical Requirements
 This section covers the requirements that must be met by the plugin-sdk in order to satisfy the demands for such a component:
@@ -20,8 +20,18 @@ The safer way to start is to use a [virtal environment](https://virtualenv.pypa.
  pip install python-plugin-sdk
  ```
 
-After that, in this virtual environment a module *interfaces* will be available from which you can inherit the AbstractVimDriver class.
+## How to use the SDK
+After it is installed you can import the following modules into your project:
 
+* org.openbaton.plugin.sdk.catalogue
+* org.openbaton.plugin.sdk.utils
+* org.openbaton.plugin.sdk.vim
+
+The catalogue module contains classes that resemble their counterparts in the Java version of the catalogue e.g. a class for VIM instances, a class for NFVImages, etc.
+The vim module contains the ```VimDriver``` class which should be extended by your specific VIM Driver class and which contains all the abstract methods that you have to implement for a working VIM Driver.
+The utils module contains the logic for handling the VIM Driver's connection to the NFVO and the scheduling of tasks so that you do not have to handle these things at all. The most important function for you in this module is the ```start_vim_driver``` function.
+
+In order to write your own VIM Driver you only have to implement the abstract methods of the ```org.openbaton.plugin.sdk.vim.VimDriver``` class and pass it to the ```org.openbaton.plugin.sdk.utils.start_vim_driver``` function. For an example have a look at the [openstack-python-vim-driver][openstack-python-vim-driver] implementation.
 
 ## Issue tracker
 
@@ -74,3 +84,4 @@ The Open Baton project provides community support through the Open Baton Public 
 [openbaton-mail]: mailto:users@openbaton.org
 [openbaton-twitter]: https://twitter.com/openbaton
 [tub-logo]: https://raw.githubusercontent.com/openbaton/openbaton.github.io/master/images/tu.png
+[openstack-python-vim-driver]: https://github.com/openbaton/openstack-python-vim-driver
