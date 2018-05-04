@@ -48,6 +48,10 @@ def convert_from_camel_to_snake(string):
 def start_vim_driver(vim_driver_class, config_file, number_maximum_worker_threads, number_listener_threads,
                      number_reply_threads, vim_driver_type, vim_driver_name, *vim_driver_args):
     log.debug("Config file location: %s" % config_file)
+    if number_listener_threads <= 0:
+        log.warning('The passed number of listener threads is {} but it has to be a positive number. One listener thread will be started'.format(number_listener_threads))
+    if number_reply_threads <= 0:
+        log.warning('The passed number of reply threads is {} but it has to be a positive number. One reply thread will be started'.format(number_reply_threads))
     config = config_parser.ConfigParser()
     config.read(config_file)
     props = get_map(section='rabbitmq', config_parser=config)
@@ -136,7 +140,7 @@ class WorkerPool():
         with self.lock:
             if self.stopped:
                 raise Exception('WorkerPool has already been stopped')
-            if self.max_threads == 0 or len(self.threads) < self.max_threads:
+            if self.max_threads <= 0 or len(self.threads) < self.max_threads:
                 vim_driver_instance = self.vimdriver_class(*self.vim_driver_args)
                 new_thread = WorkerThread(self.remove_thread, self.reply_queue, vim_driver_instance.process_message,
                                           message)
