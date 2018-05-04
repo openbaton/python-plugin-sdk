@@ -33,6 +33,20 @@ The utils module contains the logic for handling the VIM Driver's connection to 
 
 In order to write your own VIM Driver you only have to implement the abstract methods of the ```org.openbaton.plugin.sdk.vim.VimDriver``` class and pass it to the ```org.openbaton.plugin.sdk.utils.start_vim_driver``` function. For an example have a look at the [openstack-python-vim-driver][openstack-python-vim-driver] implementation.
 
+The SDK requires a configuration file that has to be passed to the ```start_vim_driver``` function. This configuration file should be an INI file with the following section:
+
+```ini
+[rabbitmq]
+username = openbaton-manager-user
+password = openbaton
+broker_ip = 127.0.0.1
+port = 5672
+heartbeat = 1
+exchange-name = openbaton-exchange
+```
+
+These values are need for the SDK to connect to RabbitMQ and to communicate with the NFVO.
+
 ## Issue tracker
 
 Issues and bug reports should be posted to the GitHub Issue Tracker of this project
