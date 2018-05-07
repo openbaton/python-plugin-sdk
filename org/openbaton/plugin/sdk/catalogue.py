@@ -16,17 +16,17 @@
 #  * See the License for the specific language governing permissions and
 #  * limitations under the License.
 #  *
-#  
+#
 # package: org.openbaton.catalogue.nfvo
-from datetime import date
+from enum import Enum
 
 
 class _BaseObject(object):
     def get_dict(self):
-        return self.__dict__
+        return dict(self.__dict__)
 
 
-class ImageStatus:
+class ImageStatus(Enum):
     """ generated source for enum ImageStatus """
     UNRECOGNIZED = u'UNRECOGNIZED'
     ACTIVE = u'ACTIVE'
@@ -48,8 +48,8 @@ class NFVImage(_BaseObject):
                  is_public: bool = False,
                  disk_format: str = None,
                  container_format: str = None,
-                 created: date = None,
-                 updated: date = None,
+                 created: str = None,
+                 updated: str = None,
                  status: ImageStatus = None):
         self.id = _id
         self.version = version
@@ -69,28 +69,28 @@ class NFVImage(_BaseObject):
 
     def __str__(self):
         """ generated source for method toString """
-        if self.created:
-            created_isoformat = self.created.isoformat()
-        else:
-            created_isoformat = "None"
-        if self.updated:
-            updated_isoformat = self.updated.isoformat()
-        else:
-            updated_isoformat = "None"
         return "Image{" + \
-               "id='" + self.id + '\'' + \
-               ", name='" + self.name + '\'' + \
-               ", version=" + self.version + \
-               ", extId='" + self.extId + '\'' + \
+               "id='" + str(self.id) + '\'' + \
+               ", name='" + str(self.name) + '\'' + \
+               ", version=" + str(self.version) + \
+               ", extId='" + str(self.extId) + '\'' + \
                ", minRam='" + str(self.minRam) + '\'' + \
                ", minDiskSpace='" + str(self.minDiskSpace) + '\'' + \
-               ", minCPU='" + self.minCPU + '\'' + \
+               ", minCPU='" + str(self.minCPU) + '\'' + \
                ", public='" + str(self.isPublic) + '\'' + \
-               ", diskFormat='" + self.diskFormat + '\'' + \
-               ", containerFormat='" + self.containerFormat + '\'' + \
-               ", status='" + str(self.status) + '\'' + \
-               ", created='" + created_isoformat + '\'' + \
-               ", updated='" + updated_isoformat + '\'' + '}'
+               ", diskFormat='" + str(self.diskFormat) + '\'' + \
+               ", containerFormat='" + str(self.containerFormat) + '\'' + \
+               ", status='" + str(self.status.value) + '\'' if self.status else 'None' + '\'' + \
+               ", created='" + str(self.created) + '\'' + \
+               ", updated='" + str(self.updated) + '\'' + '}'
+
+    def get_dict(self):
+        _dict = dict(self.__dict__)
+        if self.status is not None and self.status.value is not None:
+            _dict['status'] = self.status.value
+        else:
+            _dict.pop('status', None)
+        return _dict
 
 
 class Subnet(_BaseObject):
@@ -108,10 +108,10 @@ class Subnet(_BaseObject):
 
     def __str__(self):
         """ generated source for method toString """
-        return "Subnet{" + "id='" + self.id + '\'' + ", version=" + str(self.version) + \
-               ", name='" + self.name + '\'' + ", extId='" + self.extId + '\'' + \
-               ", networkId='" + self.networkId + '\'' + ", cidr='" + self.cidr + '\'' + \
-               ", gatewayIp='" + self.gatewayIp + '\'' + '}'
+        return "Subnet{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
+               ", name='" + str(self.name) + '\'' + ", extId='" + str(self.extId) + '\'' + \
+               ", networkId='" + str(self.networkId) + '\'' + ", cidr='" + str(self.cidr) + '\'' + \
+               ", gatewayIp='" + str(self.gatewayIp) + '\'' + '}'
 
 
 class Network(_BaseObject):
@@ -127,14 +127,14 @@ class Network(_BaseObject):
 
     def __str__(self):
         """ generated source for method toString """
-        return "Network{" + "id='" + self.id + '\'' + ", name='" + self.name + '\'' + \
-               ", extId='" + self.extId + '\'' + ", external=" + str(self.external) + \
-               ", shared=" + str(self.shared) + ", subnets=" + str(self.subnets) + '}'
+        return "Network{" + "id='" + str(self.id) + '\'' + ", name='" + str(self.name) + '\'' + \
+               ", extId='" + str(self.extId) + '\'' + ", external=" + str(self.external) + \
+               ", shared=" + str(self.shared) + ", subnets=" + str([str(sn) for sn in self.subnets if self.subnets]) + '}'
 
     def get_dict(self):
-        _dict = self.__dict__
-        if self.subnets:
-            _dict['subnets'] = [sub.__dict__ for sub in self.subnets]
+        _dict = dict(self.__dict__)
+        if self.subnets is not None:
+            _dict['subnets'] = [sub.get_dict() for sub in self.subnets]
         else:
             _dict.pop('subnets', None)
         return _dict
@@ -144,8 +144,7 @@ class DeploymentFlavour(_BaseObject):
     """ generated source for class DeploymentFlavour """
 
     def __init__(self, _id: str = None, _version: int = None, flavour_key: str = None, ext_id: str = None,
-                 ram: int = None,
-                 disk: int = None, vcpu: int = None):
+                 ram: int = None, disk: int = None, vcpu: int = None):
         # ID of the deployment flavour.
         self.id = _id
         self.version = _version
@@ -163,14 +162,15 @@ class DeploymentFlavour(_BaseObject):
 
     def __str__(self):
         """ generated source for method toString """
-        return "DeploymentFlavour{" + "id='" + self.id + '\'' + ", version=" + str(self.version) + \
-               ", flavour_key='" + self.flavour_key + '\'' + ", extId='" + self.extId + '\'' + '}'
+        return "DeploymentFlavour{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
+               ", flavour_key='" + str(self.flavour_key) + '\'' + ", extId='" + str(self.extId) + '\'' + '}'
 
 
 class Location(_BaseObject):
     """ generated source for class Location """
 
-    def __init__(self, _id=None, _version=None, name=None, latitude=None, longitude=None):
+    def __init__(self, _id: str = None, _version: int = None, name: str = None, latitude: str = None,
+                 longitude: str = None):
         self.id = _id
         self.version = _version
         self.name = name
@@ -179,51 +179,125 @@ class Location(_BaseObject):
 
     def __str__(self):
         """ generated source for method toString """
-        return "Location{" + "id='" + self.id + '\'' + ", version=" + self.version + ", name='" + self.name + '\'' + ", latitude='" + self.latitude + '\'' + ", longitude='" + self.longitude + '\'' + '}'
+        return "Location{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
+               ", name='" + str(self.name) + '\'' + ", latitude='" + str(self.latitude) + '\'' + \
+               ", longitude='" + str(self.longitude) + '\'' + '}'
+
+class AvailabilityZone(_BaseObject):
+    def __init__(self, _id: str = None, _version: int = None, name: str = None, available: bool = None, hosts: dict = {}):
+        self.id = _id
+        self.version = _version
+        self.name = name
+        self.available = available
+        self.hosts = hosts
+
+    def __str__(self):
+        return "AvailabilityZone{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
+               ", name='" + str(self.name) + '\'' + ", available=" + str(self.available) + \
+               ", hosts=" + str(self.hosts) + '}'
+
+class PopKeypair(_BaseObject):
+    def __init__(self, _id: str = None, _version: int = None, name: str = None, public_key: str = None, fingerprint: str = None):
+        self.id = _id
+        self.version = _version
+        self.name = name
+        self.publicKey = public_key
+        self.fingerprint = fingerprint
+
+    def __str__(self):
+        return "AvailabilityZone{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
+               ", name='" + str(self.name) + '\'' + ", publicKey='" + str(self.publicKey) + \
+               "', fingerprint='" + str(self.fingerprint) + '\'}'
 
 
-class VimInstance(_BaseObject):
+
+class BaseVimInstance(_BaseObject):
     """ generated source for class VimInstance """
 
     def __init__(self, _id: str = None, _version: int = None, name: str = None, auth_url: str = None,
                  tenant: str = None, username: str = None, password: str = None,
-                 key_pair: str = None, location: Location = None, security_groups: list = None, flavours: list = None,
+                 key_pair: str = None, location: Location = None, security_groups: list = None, flavours: [DeploymentFlavour] = None,
                  _type: str = None, images: list = None,
-                 networks: list = None, project_id: str = None, active: bool = None):
+                 networks: [Network] = None, project_id: str = None, active: bool = None):
         self.id = _id
         self.version = _version
         self.name = name
         self.authUrl = auth_url
-        self.tenant = tenant
-        self.username = username
-        self.password = password
-        self.keyPair = key_pair
         self.location = location
-        self.securityGroups = security_groups
-        self.flavours = flavours
         self.type = _type
         self.images = images
         self.networks = networks
-        self.projectId = project_id
         self.active = active
 
     def __str__(self):
         """ generated source for method toString """
-        return "VimInstance{" + "id='" + self.id + '\'' + ", version=" + str(
-            self.version) + ", name='" + self.name + '\'' + ", authUrl='" + self.authUrl + '\'' + ", tenant='" + self.tenant + '\'' + ", username='" + self.username + '\'' + ", password='************'" + ", keyPair='" + self.keyPair + '\'' + ", location=" + str(
-            self.location) + ", securityGroups=" + str(
-            self.securityGroups) + ", flavours=" + str(
-            self.flavours) + ", type='" + self.type + '\'' + ", images=" + str(self.images) + ", networks=" + str(
-            self.networks) + ", projectId='" + self.projectId + '\'' + ", active=" + str(self.active) + '}'
+        return "VimInstance{" + "id='" + str(self.id) + '\'' + ", version=" + str(
+            self.version) + ", name='" + str(self.name) + '\'' + ", authUrl='" + str(self.authUrl) + '\'' + \
+            ", location=" + str(self.location) + ", type='" + str(self.type) + '\'' + \
+            ", images=" + str(self.images) + ", networks=" + str([str(n) for n in self.networks if self.networks]) + \
+            ", active=" + str(self.active) + '}'
 
     def get_dict(self):
-        _dict = self.__dict__
-        if self.location:
-            _dict['location'] = self.location.__dict__
+        _dict = dict(self.__dict__)
+        if self.location is not None:
+            _dict['location'] = self.location.get_dict()
         else:
             _dict.pop('location', None)
+        if self.images is not None:
+            _dict['images'] = [image.get_dict() for image in self.images]
+        else:
+            _dict.pop('images', None)
+        if self.networks is not None:
+            _dict['networks'] = [net.get_dict() for net in self.networks]
+        else:
+            _dict.pop('networks', None)
         return _dict
 
+class OpenstackVimInstance(BaseVimInstance):
+    def __init__(self, _id: str = None, _version: int = None, name: str = None, auth_url: str = None,
+                 tenant: str = None, username: str = None, password: str = None,
+                 key_pair: str = None, location: Location = None, security_groups: list = None, flavours: [DeploymentFlavour] = [],
+                 _type: str = None, images: list = None, networks: [Network] = [], zones: [AvailabilityZone] = [],
+                 project_id: str = None, active: bool = None):
+        super(OpenstackVimInstance, self).__init__(_id=_id, _version=_version, name=name, auth_url=auth_url, images=images,
+                                                   networks=networks, location=location, type=_type, active=active)
+
+        self.tenant = tenant
+        self.username = username
+        self.password = password
+        self.keyPair = key_pair
+        self.securityGroups = security_groups
+        self.flavours = flavours
+        self.projectId = project_id
+        self.zones = zones
+
+    def __str__(self):
+        """ generated source for method toString """
+        return "VimInstance{" + "id='" + str(self.id) + '\'' + ", version=" + str(
+            self.version) + ", name='" + str(self.name) + '\'' + ", authUrl='" + str(self.authUrl) + '\'' + \
+            ", tenant='" + str(self.tenant) + '\'' + ", username='" + str(self.username) + '\'' + \
+            ", password='************'" + ", keyPair='" + str(self.keyPair) + '\'' + ", location=" + str(
+            self.location) + ", securityGroups=" + str(self.securityGroups) + ", flavours=" + str(
+            [str(f) for f in self.flavours if self.flavours]) + ", zones=" + str([str(z) for z in self.zones if self.zones]) + \
+            ", type='" + str(self.type) + '\'' + ", images=" + str(self.images) + ", networks=" + \
+            str([str(n) for n in self.networks if self.networks]) + ", projectId='" + str(self.projectId) + '\'' + \
+            ", active=" + str(self.active) + '}'
+
+    def get_dict(self):
+        _super_dict = super(BaseVimInstance, self).get_dict()
+        _dict = dict(self.__dict__)
+        if self.flavours is not None:
+            _dict['flavours'] = [flavour.get_dict() for flavour in self.flavours]
+        else:
+            _dict.pop('flavours', None)
+        for key in _super_dict:
+            value = _dict.get(key)
+            # if the value is not a primitive type or a list of primitive types overwrite the value in _dict with the value from _super_dict
+            if value is None or (type(value) in (dict, str, int, bool) or
+                 (type(value) == list and (len(value)==0 or type(value[0]) in (dict, str, int, bool)))):
+                continue
+            _dict[key] = _super_dict.get(key)
+        return _dict
 
 class Server(_BaseObject):
     """ generated source for class Server """
@@ -238,8 +312,8 @@ class Server(_BaseObject):
                  ext_id: str = None,
                  ips: dict = None,
                  floating_ips: dict = None,
-                 created: date = None,
-                 updated: date = None,
+                 created: str = None,
+                 updated: str = None,
                  hostname: str = None,
                  hypervisor_host_name: str = None,
                  instance_name: str = None):
@@ -261,21 +335,21 @@ class Server(_BaseObject):
 
     def __str__(self):
         """ generated source for method toString """
-        return "Server{" + "id='" + self.id + '\'' + ", version=" + str(
-            self.version) + ", name='" + self.name + '\'' + ", image=" + str(self.image) + ", flavor=" + str(
-            self.flavor) + ", status='" + self.status + '\'' + ", extendedStatus='" + self.extendedStatus + '\'' + ", extId='" + self.extId + '\'' + ", ips=" + str(
-            self.ips) + ", floatingIps=" + str(self.floatingIps) + ", created=" + str(
-            self.created) + ", updated=" + str(
-            self.updated) + ", hostName='" + self.hostName + '\'' + ", hypervisorHostName='" + self.hypervisorHostName + '\'' + ", instanceName='" + self.instanceName + '\'' + '}'
+        return "Server{" + "id='" + str(self.id) + '\'' + ", version=" + str(
+            self.version) + ", name='" + str(self.name) + '\'' + ", image=" + str(self.image) + ", flavor=" + str(
+            self.flavor) + ", status='" + str(self.status) + '\'' + ", extendedStatus='" + str(self.extendedStatus) + \
+            '\'' + ", extId='" + str(self.extId) + '\'' + ", ips=" + str(self.ips) + ", floatingIps=" + str(self.floatingIps) + \
+            ", created=" + str(self.created) + ", updated=" + str(self.updated) + ", hostName='" + str(self.hostName) + '\'' + \
+            ", hypervisorHostName='" + str(self.hypervisorHostName) + '\'' + ", instanceName='" + str(self.instanceName) + '\'' + '}'
 
     def get_dict(self):
-        _dict = self.__dict__
+        _dict = dict(self.__dict__)
         if self.image:
-            _dict['image'] = self.image.__dict__
+            _dict['image'] = self.image.get_dict()
         else:
             _dict.pop('image', None)
         if self.flavor:
-            _dict['flavor'] = self.flavor.__dict__
+            _dict['flavor'] = self.flavor.get_dict()
         else:
             _dict.pop('flavor', None)
         return _dict
@@ -285,8 +359,7 @@ class Quota(_BaseObject):
     """ generated source for class Quota """
 
     def __init__(self, _id: str = None, _version: int = None, tenant: str = None, cores: int = None,
-                 floating_ips: int = None,
-                 instances: int = None, keypairs: int = None, ram: int = None):
+                 floating_ips: int = None, instances: int = None, keypairs: int = None, ram: int = None):
         self.id = _id
         self.version = _version
         self.tenant = tenant
@@ -298,4 +371,8 @@ class Quota(_BaseObject):
 
     def __str__(self):
         """ generated source for method toString """
-        return "Quota{" + "id='" + self.id + '\'' + ", version=" + self.version + ", tenant='" + self.tenant + '\'' + ", cores='" + self.cores + '\'' + ", floatingIps='" + self.floatingIps + '\'' + ", instances='" + self.instances + '\'' + ", keypairs='" + self.keyPairs + '\'' + ", ram='" + self.ram + '\'' + '}'
+        return "Quota{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + ", tenant='" + \
+               str(self.tenant) + '\'' + ", cores='" + str(self.cores) + '\'' + ", floatingIps='" + \
+               str(self.floatingIps) + '\'' + ", instances='" + str(self.instances) + '\'' + ", keypairs='" + \
+               str(self.keyPairs) + '\'' + ", ram='" + str(self.ram) + '\'' + '}'
+
