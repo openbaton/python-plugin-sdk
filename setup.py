@@ -14,7 +14,7 @@ def read(fname):
 
 setup(
     name="python-plugin-sdk",
-    version='4.0.1b',
+    version='5.0.0',
     author="Open Baton",
     author_email="dev@openbaton.org",
     description="The Python version of the Open Baton plugin-sdk",
@@ -25,7 +25,7 @@ setup(
     install_requires=['pika'],
     long_description=read('README.rst'),
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         'Topic :: Software Development :: Build Tools',
         "Topic :: Utilities",
