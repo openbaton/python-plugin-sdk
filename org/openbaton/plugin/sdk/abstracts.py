@@ -3,7 +3,6 @@ import logging
 import traceback
 from datetime import date
 
-
 from org.openbaton.plugin.sdk.utils import convert_from_camel_to_snake
 
 try:
@@ -39,8 +38,8 @@ class AbstractVimDriver():
                 for obj in ret_obj:
                     if type(obj) in (int, float, bool, str, date, dict):
                         answer.get('answer').append(obj)
-                        #answer['answer'] = ret_obj
-                        #break
+                        # answer['answer'] = ret_obj
+                        # break
                     else:
                         json_obj = obj.get_dict()
                         answer.get('answer').append(json_obj)
@@ -48,7 +47,9 @@ class AbstractVimDriver():
                 answer['answer'] = ret_obj
 
         except Exception as e:
+            log.error(
+                'An exception ({}) occurred while executing the {} method: {}'.format(type(e).__name__, method_name,
+                                                                                      str(e)))
             traceback.print_exc()
-            answer['exception'] = {'detailMessage':str(e)}
+            answer['exception'] = {'detailMessage': str(e)}
         return json.dumps(answer)
-
