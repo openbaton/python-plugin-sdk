@@ -14,7 +14,7 @@ def read(fname):
 
 setup(
     name="python-plugin-sdk",
-    version='6.0.0rc1',
+    version='6.0.0rc2',
     author="Open Baton",
     author_email="dev@openbaton.org",
     description="The Python version of the Open Baton plugin-sdk",
