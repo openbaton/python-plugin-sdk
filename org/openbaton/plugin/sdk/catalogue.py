@@ -129,7 +129,8 @@ class Network(_BaseObject):
         """ generated source for method toString """
         return "Network{" + "id='" + str(self.id) + '\'' + ", name='" + str(self.name) + '\'' + \
                ", extId='" + str(self.extId) + '\'' + ", external=" + str(self.external) + \
-               ", shared=" + str(self.shared) + ", subnets=" + str([str(sn) for sn in self.subnets if self.subnets]) + '}'
+               ", shared=" + str(self.shared) + ", subnets=" + \
+            str([str(sn) for sn in self.subnets if self.subnets]) + '}'
 
     def get_dict(self):
         _dict = dict(self.__dict__)
@@ -163,7 +164,9 @@ class DeploymentFlavour(_BaseObject):
     def __str__(self):
         """ generated source for method toString """
         return "DeploymentFlavour{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
-               ", flavour_key='" + str(self.flavour_key) + '\'' + ", extId='" + str(self.extId) + '\'' + '}'
+               ", flavour_key='" + \
+            str(self.flavour_key) + '\'' + ", extId='" + \
+            str(self.extId) + '\'' + '}'
 
 
 class Location(_BaseObject):
@@ -183,6 +186,7 @@ class Location(_BaseObject):
                ", name='" + str(self.name) + '\'' + ", latitude='" + str(self.latitude) + '\'' + \
                ", longitude='" + str(self.longitude) + '\'' + '}'
 
+
 class AvailabilityZone(_BaseObject):
     def __init__(self, _id: str = None, _version: int = None, name: str = None, available: bool = None, hosts: dict = {}):
         self.id = _id
@@ -196,6 +200,7 @@ class AvailabilityZone(_BaseObject):
                ", name='" + str(self.name) + '\'' + ", available=" + str(self.available) + \
                ", hosts=" + str(self.hosts) + '}'
 
+
 class PopKeypair(_BaseObject):
     def __init__(self, _id: str = None, _version: int = None, name: str = None, public_key: str = None, fingerprint: str = None):
         self.id = _id
@@ -208,7 +213,6 @@ class PopKeypair(_BaseObject):
         return "AvailabilityZone{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
                ", name='" + str(self.name) + '\'' + ", publicKey='" + str(self.publicKey) + \
                "', fingerprint='" + str(self.fingerprint) + '\'}'
-
 
 
 class BaseVimInstance(_BaseObject):
@@ -253,6 +257,7 @@ class BaseVimInstance(_BaseObject):
             _dict.pop('networks', None)
         return _dict
 
+
 class OpenstackVimInstance(BaseVimInstance):
     def __init__(self, _id: str = None, _version: int = None, name: str = None, auth_url: str = None,
                  tenant: str = None, username: str = None, password: str = None,
@@ -287,17 +292,19 @@ class OpenstackVimInstance(BaseVimInstance):
         _super_dict = super(BaseVimInstance, self).get_dict()
         _dict = dict(self.__dict__)
         if self.flavours is not None:
-            _dict['flavours'] = [flavour.get_dict() for flavour in self.flavours]
+            _dict['flavours'] = [flavour.get_dict()
+                                 for flavour in self.flavours]
         else:
             _dict.pop('flavours', None)
         for key in _super_dict:
             value = _dict.get(key)
             # if the value is not a primitive type or a list of primitive types overwrite the value in _dict with the value from _super_dict
             if value is None or (type(value) in (dict, str, int, bool) or
-                 (type(value) == list and (len(value)==0 or type(value[0]) in (dict, str, int, bool)))):
+                                 (type(value) == list and (len(value) == 0 or type(value[0]) in (dict, str, int, bool)))):
                 continue
             _dict[key] = _super_dict.get(key)
         return _dict
+
 
 class Server(_BaseObject):
     """ generated source for class Server """
@@ -340,7 +347,9 @@ class Server(_BaseObject):
             self.flavor) + ", status='" + str(self.status) + '\'' + ", extendedStatus='" + str(self.extendedStatus) + \
             '\'' + ", extId='" + str(self.extId) + '\'' + ", ips=" + str(self.ips) + ", floatingIps=" + str(self.floatingIps) + \
             ", created=" + str(self.created) + ", updated=" + str(self.updated) + ", hostName='" + str(self.hostName) + '\'' + \
-            ", hypervisorHostName='" + str(self.hypervisorHostName) + '\'' + ", instanceName='" + str(self.instanceName) + '\'' + '}'
+            ", hypervisorHostName='" + \
+            str(self.hypervisorHostName) + '\'' + ", instanceName='" + \
+            str(self.instanceName) + '\'' + '}'
 
     def get_dict(self):
         _dict = dict(self.__dict__)
@@ -374,5 +383,5 @@ class Quota(_BaseObject):
         return "Quota{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + ", tenant='" + \
                str(self.tenant) + '\'' + ", cores='" + str(self.cores) + '\'' + ", floatingIps='" + \
                str(self.floatingIps) + '\'' + ", instances='" + str(self.instances) + '\'' + ", keypairs='" + \
-               str(self.keyPairs) + '\'' + ", ram='" + str(self.ram) + '\'' + '}'
-
+               str(self.keyPairs) + '\'' + ", ram='" + \
+            str(self.ram) + '\'' + '}'

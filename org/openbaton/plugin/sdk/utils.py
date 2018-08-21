@@ -4,6 +4,7 @@ import logging
 import re
 import time
 import uuid
+import os
 
 import pika
 
@@ -68,30 +69,38 @@ def start_vim_driver(vim_driver_class, config_file, number_maximum_worker_thread
     """
     log.debug("Config file location: %s" % config_file)
     if number_listener_threads <= 0:
-        log.warning('The passed number of listener threads is {} but it has to be a positive number. One listener thread will be started'.format(number_listener_threads))
+        log.warning('The passed number of listener threads is {} but it has to be a positive number. One listener thread will be started'.format(
+            number_listener_threads))
     if number_reply_threads <= 0:
-        log.warning('The passed number of reply threads is {} but it has to be a positive number. One reply thread will be started'.format(number_reply_threads))
+        log.warning('The passed number of reply threads is {} but it has to be a positive number. One reply thread will be started'.format(
+            number_reply_threads))
     config = config_parser.ConfigParser()
     config.read(config_file)
     props = get_map(section='rabbitmq', config_parser=config)
-    rabbit_uname = props.get('username', 'openbaton-manager-user')
-    rabbit_pwd = props.get('password', 'openbaton')
-    broker_ip = props.get('broker_ip', '127.0.0.1')
-    rabbit_port = props.get('port', 5672)
+    rabbit_uname = os.environ.get('RABBITMQ_USER', props.get(
+        'username', 'openbaton-manager-user'))
+    rabbit_pwd = os.environ.get(
+        'RABBITMQ_PW', props.get('password', 'openbaton'))
+    broker_ip = os.environ.get(
+        'RABBITMQ_IP', props.get('broker_ip', '127.0.0.1'))
+    rabbit_port = os.environ.get('RABBITMQ_PORT', props.get('port', 5672))
     heartbeat = int(props.get('heartbeat', 60))
     exchange_name = props.get('exchange-name', 'openbaton-exchange')
 
     try:
         vim_driver_uname, vim_driver_pwd = register_vim_driver(broker_ip, rabbit_port, rabbit_uname, rabbit_pwd,
-                                                           exchange_name, heartbeat, vim_driver_type)
+                                                               exchange_name, heartbeat, vim_driver_type)
     except KeyboardInterrupt:
         return
-    rabbit_credentials = pika.PlainCredentials(vim_driver_uname, vim_driver_pwd)
+    rabbit_credentials = pika.PlainCredentials(
+        vim_driver_uname, vim_driver_pwd)
 
     reply_queue = Queue()
     stop_event = threading.Event()
-    log.debug('Creating worker pool with a maximum of {} threads'.format(number_maximum_worker_threads))
-    worker_pool = WorkerPool(reply_queue, vim_driver_class, number_maximum_worker_threads, *vim_driver_args)
+    log.debug('Creating worker pool with a maximum of {} threads'.format(
+        number_maximum_worker_threads))
+    worker_pool = WorkerPool(
+        reply_queue, vim_driver_class, number_maximum_worker_threads, *vim_driver_args)
     log.debug('Creating {} listener threads'.format(number_listener_threads))
     listener_threads = [ListenerThread(vim_driver_class, worker_pool, broker_ip, rabbit_port, heartbeat, exchange_name,
                                        rabbit_credentials, vim_driver_type, vim_driver_name) for _ in
@@ -160,7 +169,8 @@ class WorkerPool():
             if self.stopped:
                 raise Exception('WorkerPool has already been stopped')
             if self.max_threads <= 0 or len(self.threads) < self.max_threads:
-                vim_driver_instance = self.vimdriver_class(*self.vim_driver_args)
+                vim_driver_instance = self.vimdriver_class(
+                    *self.vim_driver_args)
                 new_thread = WorkerThread(self.remove_thread, self.reply_queue, vim_driver_instance.process_message,
                                           message)
                 new_thread.start()
@@ -180,7 +190,8 @@ class WorkerPool():
         log.debug('Joining {} worker threads'.format(number_worker_threads))
         for i in range(number_worker_threads):
             self.threads[i].join()
-            log.debug('Joined {}/{} worker threads'.format(i+1, number_worker_threads))
+            log.debug('Joined {}/{} worker threads'.format(i +
+                                                           1, number_worker_threads))
 
 
 class WorkerThread(threading.Thread):
@@ -198,7 +209,8 @@ class WorkerThread(threading.Thread):
             response = self.process_message_function(body)
         finally:
             if response is not None:
-                self.reply_queue.put((props.reply_to, props.correlation_id, response))
+                self.reply_queue.put(
+                    (props.reply_to, props.correlation_id, response))
             self.remove_thread_callback(self)
 
 
@@ -243,7 +255,8 @@ def register_vim_driver(broker_ip, rabbit_port, rabbit_uname, rabbit_pwd, exchan
             break
         time.sleep(0.1)
     else:
-        log.error('After 180 seconds no registration response was received. Giving up...')
+        log.error(
+            'After 180 seconds no registration response was received. Giving up...')
         channel.close()
         connection.close()
         sys.exit(1)
@@ -274,7 +287,8 @@ def deregister_vim_driver(broker_ip, rabbit_port, vim_driver_uname, vim_driver_p
     try:
 
         connection, channel = connect_to_rabbitmq(broker_ip, rabbit_port,
-                                                  pika.PlainCredentials(vim_driver_uname, vim_driver_pwd),
+                                                  pika.PlainCredentials(
+                                                      vim_driver_uname, vim_driver_pwd),
                                                   exchange_name, 'nfvo.manager.handling')
         deregister_message = json.dumps(dict(username=vim_driver_uname,
                                              password=vim_driver_pwd,
@@ -305,7 +319,8 @@ class ListenerThread(threading.Thread):
         super(ListenerThread, self).__init__()
         self.vim_driver_type = vim_driver_type
         self.vim_driver_name = vim_driver_name if vim_driver_name is not None else vim_driver_type
-        self.queue_name = "vim-drivers.%s.%s" % (self.vim_driver_type, self.vim_driver_name)
+        self.queue_name = "vim-drivers.%s.%s" % (
+            self.vim_driver_type, self.vim_driver_name)
         self.worker_pool = worker_pool
 
         self.rabbit_credentials = rabbit_credentials
@@ -328,9 +343,12 @@ class ListenerThread(threading.Thread):
         self.channel = self.connection.channel()
         self.channel.basic_qos(prefetch_count=1)
 
-        self.channel.queue_declare(queue=self.queue_name, durable=True, auto_delete=True)
-        self.channel.queue_bind(exchange=self.exchange_name, queue=self.queue_name, routing_key=self.queue_name)
-        self.channel.basic_consume(self.dispatch, no_ack=False, queue=self.queue_name)
+        self.channel.queue_declare(
+            queue=self.queue_name, durable=True, auto_delete=True)
+        self.channel.queue_bind(exchange=self.exchange_name,
+                                queue=self.queue_name, routing_key=self.queue_name)
+        self.channel.basic_consume(
+            self.dispatch, no_ack=False, queue=self.queue_name)
 
         try:
             self.channel.start_consuming()
@@ -353,7 +371,8 @@ class ListenerThread(threading.Thread):
                 break
             except NoWorkerAvailable:
                 time.sleep(0.2)
-        log.debug('Message has been submitted to the worker pool by the listener thread')
+        log.debug(
+            'Message has been submitted to the worker pool by the listener thread')
 
 
 class ReplyThread(threading.Thread):
@@ -397,7 +416,8 @@ class ReplyThread(threading.Thread):
                                                    body=response)
                         log.debug('Successfully sent reply')
                     except Exception as e:
-                        log.error('Also the second attempt to send the reply to the NFVO failed. Reply message will be discarded: {}'.format(e))
+                        log.error(
+                            'Also the second attempt to send the reply to the NFVO failed. Reply message will be discarded: {}'.format(e))
                 finally:
                     self.reply_queue.task_done()
         finally:

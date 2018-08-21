@@ -151,4 +151,3 @@ class VimDriver(AbstractVimDriver):
     @abstractmethod
     def get_type(self, vim_instance: dict) -> str:
         """ generated source for method getType """
-
