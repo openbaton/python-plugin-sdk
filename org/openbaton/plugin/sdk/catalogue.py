@@ -81,8 +81,10 @@ class NFVImage(_BaseObject):
                ", diskFormat='" + str(self.diskFormat) + '\'' + \
                ", containerFormat='" + str(self.containerFormat) + '\'' + \
                ", status='" + str(self.status.value) + '\'' if self.status else 'None' + '\'' + \
-               ", created='" + str(self.created) + '\'' + \
-               ", updated='" + str(self.updated) + '\'' + '}'
+                                                                                ", created='" + str(
+            self.created) + '\'' + \
+                                                                                ", updated='" + str(
+            self.updated) + '\'' + '}'
 
     def get_dict(self):
         _dict = dict(self.__dict__)
@@ -97,7 +99,7 @@ class Subnet(_BaseObject):
     """ generated source for class Subnet """
 
     def __init__(self, _id: str = None, _version: int = None, name: str = None, ext_id: str = None,
-                 network_id: str = None, cidr: str = None, gateway_ip: str = None):
+                 network_id: str = None, cidr: str = None, gateway_ip: str = None, dns: [str] = []):
         self.id = _id
         self.version = _version
         self.name = name
@@ -105,13 +107,14 @@ class Subnet(_BaseObject):
         self.networkId = network_id
         self.cidr = cidr
         self.gatewayIp = gateway_ip
+        self.dns = dns
 
     def __str__(self):
         """ generated source for method toString """
         return "Subnet{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
                ", name='" + str(self.name) + '\'' + ", extId='" + str(self.extId) + '\'' + \
                ", networkId='" + str(self.networkId) + '\'' + ", cidr='" + str(self.cidr) + '\'' + \
-               ", gatewayIp='" + str(self.gatewayIp) + '\'' + '}'
+               ", gatewayIp='" + str(self.gatewayIp) + '\'' + ", dns=" + str(self.dns) + '}'
 
 
 class Network(_BaseObject):
@@ -130,7 +133,7 @@ class Network(_BaseObject):
         return "Network{" + "id='" + str(self.id) + '\'' + ", name='" + str(self.name) + '\'' + \
                ", extId='" + str(self.extId) + '\'' + ", external=" + str(self.external) + \
                ", shared=" + str(self.shared) + ", subnets=" + \
-            str([str(sn) for sn in self.subnets if self.subnets]) + '}'
+               str([str(sn) for sn in self.subnets if self.subnets]) + '}'
 
     def get_dict(self):
         _dict = dict(self.__dict__)
@@ -165,8 +168,8 @@ class DeploymentFlavour(_BaseObject):
         """ generated source for method toString """
         return "DeploymentFlavour{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
                ", flavour_key='" + \
-            str(self.flavour_key) + '\'' + ", extId='" + \
-            str(self.extId) + '\'' + '}'
+               str(self.flavour_key) + '\'' + ", extId='" + \
+               str(self.extId) + '\'' + '}'
 
 
 class Location(_BaseObject):
@@ -188,7 +191,8 @@ class Location(_BaseObject):
 
 
 class AvailabilityZone(_BaseObject):
-    def __init__(self, _id: str = None, _version: int = None, name: str = None, available: bool = None, hosts: dict = {}):
+    def __init__(self, _id: str = None, _version: int = None, name: str = None, available: bool = None,
+                 hosts: dict = {}):
         self.id = _id
         self.version = _version
         self.name = name
@@ -202,7 +206,8 @@ class AvailabilityZone(_BaseObject):
 
 
 class PopKeypair(_BaseObject):
-    def __init__(self, _id: str = None, _version: int = None, name: str = None, public_key: str = None, fingerprint: str = None):
+    def __init__(self, _id: str = None, _version: int = None, name: str = None, public_key: str = None,
+                 fingerprint: str = None):
         self.id = _id
         self.version = _version
         self.name = name
@@ -220,7 +225,8 @@ class BaseVimInstance(_BaseObject):
 
     def __init__(self, _id: str = None, _version: int = None, name: str = None, auth_url: str = None,
                  tenant: str = None, username: str = None, password: str = None,
-                 key_pair: str = None, location: Location = None, security_groups: list = None, flavours: [DeploymentFlavour] = None,
+                 key_pair: str = None, location: Location = None, security_groups: list = None,
+                 flavours: [DeploymentFlavour] = None,
                  _type: str = None, images: list = None,
                  networks: [Network] = None, project_id: str = None, active: bool = None):
         self.id = _id
@@ -237,9 +243,9 @@ class BaseVimInstance(_BaseObject):
         """ generated source for method toString """
         return "VimInstance{" + "id='" + str(self.id) + '\'' + ", version=" + str(
             self.version) + ", name='" + str(self.name) + '\'' + ", authUrl='" + str(self.authUrl) + '\'' + \
-            ", location=" + str(self.location) + ", type='" + str(self.type) + '\'' + \
-            ", images=" + str(self.images) + ", networks=" + str([str(n) for n in self.networks if self.networks]) + \
-            ", active=" + str(self.active) + '}'
+               ", location=" + str(self.location) + ", type='" + str(self.type) + '\'' + \
+               ", images=" + str(self.images) + ", networks=" + str([str(n) for n in self.networks if self.networks]) + \
+               ", active=" + str(self.active) + '}'
 
     def get_dict(self):
         _dict = dict(self.__dict__)
@@ -261,10 +267,12 @@ class BaseVimInstance(_BaseObject):
 class OpenstackVimInstance(BaseVimInstance):
     def __init__(self, _id: str = None, _version: int = None, name: str = None, auth_url: str = None,
                  tenant: str = None, username: str = None, password: str = None,
-                 key_pair: str = None, location: Location = None, security_groups: list = None, flavours: [DeploymentFlavour] = [],
+                 key_pair: str = None, location: Location = None, security_groups: list = None,
+                 flavours: [DeploymentFlavour] = [],
                  _type: str = None, images: list = None, networks: [Network] = [], zones: [AvailabilityZone] = [],
                  project_id: str = None, active: bool = None):
-        super(OpenstackVimInstance, self).__init__(_id=_id, _version=_version, name=name, auth_url=auth_url, images=images,
+        super(OpenstackVimInstance, self).__init__(_id=_id, _version=_version, name=name, auth_url=auth_url,
+                                                   images=images,
                                                    networks=networks, location=location, type=_type, active=active)
 
         self.tenant = tenant
@@ -280,13 +288,14 @@ class OpenstackVimInstance(BaseVimInstance):
         """ generated source for method toString """
         return "VimInstance{" + "id='" + str(self.id) + '\'' + ", version=" + str(
             self.version) + ", name='" + str(self.name) + '\'' + ", authUrl='" + str(self.authUrl) + '\'' + \
-            ", tenant='" + str(self.tenant) + '\'' + ", username='" + str(self.username) + '\'' + \
-            ", password='************'" + ", keyPair='" + str(self.keyPair) + '\'' + ", location=" + str(
+               ", tenant='" + str(self.tenant) + '\'' + ", username='" + str(self.username) + '\'' + \
+               ", password='************'" + ", keyPair='" + str(self.keyPair) + '\'' + ", location=" + str(
             self.location) + ", securityGroups=" + str(self.securityGroups) + ", flavours=" + str(
-            [str(f) for f in self.flavours if self.flavours]) + ", zones=" + str([str(z) for z in self.zones if self.zones]) + \
-            ", type='" + str(self.type) + '\'' + ", images=" + str(self.images) + ", networks=" + \
-            str([str(n) for n in self.networks if self.networks]) + ", projectId='" + str(self.projectId) + '\'' + \
-            ", active=" + str(self.active) + '}'
+            [str(f) for f in self.flavours if self.flavours]) + ", zones=" + str(
+            [str(z) for z in self.zones if self.zones]) + \
+               ", type='" + str(self.type) + '\'' + ", images=" + str(self.images) + ", networks=" + \
+               str([str(n) for n in self.networks if self.networks]) + ", projectId='" + str(self.projectId) + '\'' + \
+               ", active=" + str(self.active) + '}'
 
     def get_dict(self):
         _super_dict = super(BaseVimInstance, self).get_dict()
@@ -300,7 +309,8 @@ class OpenstackVimInstance(BaseVimInstance):
             value = _dict.get(key)
             # if the value is not a primitive type or a list of primitive types overwrite the value in _dict with the value from _super_dict
             if value is None or (type(value) in (dict, str, int, bool) or
-                                 (type(value) == list and (len(value) == 0 or type(value[0]) in (dict, str, int, bool)))):
+                                     (type(value) == list and (
+                                             len(value) == 0 or type(value[0]) in (dict, str, int, bool)))):
                 continue
             _dict[key] = _super_dict.get(key)
         return _dict
@@ -345,11 +355,13 @@ class Server(_BaseObject):
         return "Server{" + "id='" + str(self.id) + '\'' + ", version=" + str(
             self.version) + ", name='" + str(self.name) + '\'' + ", image=" + str(self.image) + ", flavor=" + str(
             self.flavor) + ", status='" + str(self.status) + '\'' + ", extendedStatus='" + str(self.extendedStatus) + \
-            '\'' + ", extId='" + str(self.extId) + '\'' + ", ips=" + str(self.ips) + ", floatingIps=" + str(self.floatingIps) + \
-            ", created=" + str(self.created) + ", updated=" + str(self.updated) + ", hostName='" + str(self.hostName) + '\'' + \
-            ", hypervisorHostName='" + \
-            str(self.hypervisorHostName) + '\'' + ", instanceName='" + \
-            str(self.instanceName) + '\'' + '}'
+               '\'' + ", extId='" + str(self.extId) + '\'' + ", ips=" + str(self.ips) + ", floatingIps=" + str(
+            self.floatingIps) + \
+               ", created=" + str(self.created) + ", updated=" + str(self.updated) + ", hostName='" + str(
+            self.hostName) + '\'' + \
+               ", hypervisorHostName='" + \
+               str(self.hypervisorHostName) + '\'' + ", instanceName='" + \
+               str(self.instanceName) + '\'' + '}'
 
     def get_dict(self):
         _dict = dict(self.__dict__)
@@ -384,4 +396,4 @@ class Quota(_BaseObject):
                str(self.tenant) + '\'' + ", cores='" + str(self.cores) + '\'' + ", floatingIps='" + \
                str(self.floatingIps) + '\'' + ", instances='" + str(self.instances) + '\'' + ", keypairs='" + \
                str(self.keyPairs) + '\'' + ", ram='" + \
-            str(self.ram) + '\'' + '}'
+               str(self.ram) + '\'' + '}'
