@@ -99,7 +99,7 @@ class Subnet(_BaseObject):
     """ generated source for class Subnet """
 
     def __init__(self, _id: str = None, _version: int = None, name: str = None, ext_id: str = None,
-                 network_id: str = None, cidr: str = None, gateway_ip: str = None, dns: [str] = []):
+                 network_id: str = None, cidr: str = None, gateway_ip: str = None, dns: [str] = None):
         self.id = _id
         self.version = _version
         self.name = name
@@ -107,7 +107,7 @@ class Subnet(_BaseObject):
         self.networkId = network_id
         self.cidr = cidr
         self.gatewayIp = gateway_ip
-        self.dns = dns
+        self.dns = dns or []
 
     def __str__(self):
         """ generated source for method toString """
@@ -119,14 +119,14 @@ class Subnet(_BaseObject):
 
 class Network(_BaseObject):
     def __init__(self, _id: str = None, version: int = None, name: str = None, ext_id: str = None,
-                 external: bool = False, shared: bool = False, subnets: [Subnet] = []):
+                 external: bool = False, shared: bool = False, subnets: [Subnet] = None):
         self.id = _id
         self.version = version
         self.name = name
         self.extId = ext_id
         self.external = external
         self.shared = shared
-        self.subnets = subnets
+        self.subnets = subnets or []
 
     def __str__(self):
         """ generated source for method toString """
@@ -192,12 +192,12 @@ class Location(_BaseObject):
 
 class AvailabilityZone(_BaseObject):
     def __init__(self, _id: str = None, _version: int = None, name: str = None, available: bool = None,
-                 hosts: dict = {}):
+                 hosts: dict = None):
         self.id = _id
         self.version = _version
         self.name = name
         self.available = available
-        self.hosts = hosts
+        self.hosts = hosts or {}
 
     def __str__(self):
         return "AvailabilityZone{" + "id='" + str(self.id) + '\'' + ", version=" + str(self.version) + \
@@ -236,7 +236,7 @@ class BaseVimInstance(_BaseObject):
         self.location = location
         self.type = _type
         self.images = images
-        self.networks = networks
+        self.networks = networks or []
         self.active = active
 
     def __str__(self):
@@ -268,8 +268,8 @@ class OpenstackVimInstance(BaseVimInstance):
     def __init__(self, _id: str = None, _version: int = None, name: str = None, auth_url: str = None,
                  tenant: str = None, username: str = None, password: str = None,
                  key_pair: str = None, location: Location = None, security_groups: list = None,
-                 flavours: [DeploymentFlavour] = [],
-                 _type: str = None, images: list = None, networks: [Network] = [], zones: [AvailabilityZone] = [],
+                 flavours: [DeploymentFlavour] = None,
+                 _type: str = None, images: list = None, networks: [Network] = None, zones: [AvailabilityZone] = None,
                  project_id: str = None, active: bool = None):
         super(OpenstackVimInstance, self).__init__(_id=_id, _version=_version, name=name, auth_url=auth_url,
                                                    images=images,
@@ -280,9 +280,9 @@ class OpenstackVimInstance(BaseVimInstance):
         self.password = password
         self.keyPair = key_pair
         self.securityGroups = security_groups
-        self.flavours = flavours
+        self.flavours = flavours or []
         self.projectId = project_id
-        self.zones = zones
+        self.zones = zones or []
 
     def __str__(self):
         """ generated source for method toString """
@@ -310,7 +310,7 @@ class OpenstackVimInstance(BaseVimInstance):
             # if the value is not a primitive type or a list of primitive types overwrite the value in _dict with the value from _super_dict
             if value is None or (type(value) in (dict, str, int, bool) or
                                      (type(value) == list and (
-                                             len(value) == 0 or type(value[0]) in (dict, str, int, bool)))):
+                                                     len(value) == 0 or type(value[0]) in (dict, str, int, bool)))):
                 continue
             _dict[key] = _super_dict.get(key)
         return _dict
@@ -342,8 +342,8 @@ class Server(_BaseObject):
         self.status = status
         self.extendedStatus = extended_status
         self.extId = ext_id
-        self.ips = ips  # dict
-        self.floatingIps = floating_ips
+        self.ips = ips or {}
+        self.floatingIps = floating_ips or {}
         self.created = created
         self.updated = updated
         self.hostName = hostname
