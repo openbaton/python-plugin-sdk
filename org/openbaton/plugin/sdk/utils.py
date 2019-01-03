@@ -69,11 +69,13 @@ def start_vim_driver(vim_driver_class, config_file, number_maximum_worker_thread
     """
     log.debug("Config file location: %s" % config_file)
     if number_listener_threads <= 0:
-        log.warning('The passed number of listener threads is {} but it has to be a positive number. One listener thread will be started'.format(
-            number_listener_threads))
+        log.warning(
+            'The passed number of listener threads is {} but it has to be a positive number. One listener thread will be started'.format(
+                number_listener_threads))
     if number_reply_threads <= 0:
-        log.warning('The passed number of reply threads is {} but it has to be a positive number. One reply thread will be started'.format(
-            number_reply_threads))
+        log.warning(
+            'The passed number of reply threads is {} but it has to be a positive number. One reply thread will be started'.format(
+                number_reply_threads))
     config = config_parser.ConfigParser()
     config.read(config_file)
     props = get_map(section='rabbitmq', config_parser=config)
@@ -270,10 +272,11 @@ def register_vim_driver(broker_ip, rabbit_port, rabbit_uname, rabbit_pwd, exchan
     return response_dict.get('rabbitUsername'), response_dict.get('rabbitPassword')
 
 
-def connect_to_rabbitmq(broker_ip, rabbit_port, rabbit_credentials, exchange_name, queue_name):
+def connect_to_rabbitmq(broker_ip, rabbit_port, rabbit_credentials, exchange_name, queue_name, heartbeat):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=broker_ip,
                                                                    port=rabbit_port,
-                                                                   credentials=rabbit_credentials))
+                                                                   credentials=rabbit_credentials,
+                                                                   heartbeat=heartbeat))
     channel = connection.channel()
     channel.exchange_declare(exchange=exchange_name, passive=True)
     channel.basic_qos(prefetch_count=1)
@@ -289,7 +292,7 @@ def deregister_vim_driver(broker_ip, rabbit_port, vim_driver_uname, vim_driver_p
         connection, channel = connect_to_rabbitmq(broker_ip, rabbit_port,
                                                   pika.PlainCredentials(
                                                       vim_driver_uname, vim_driver_pwd),
-                                                  exchange_name, 'nfvo.manager.handling')
+                                                  exchange_name, 'nfvo.manager.handling', heartbeat=0)
         deregister_message = json.dumps(dict(username=vim_driver_uname,
                                              password=vim_driver_pwd,
                                              action='unregister'))
@@ -382,8 +385,9 @@ class ReplyThread(threading.Thread):
         self.rabbit_port = rabbit_port
         self.rabbit_credentials = rabbit_credentials
         self.exchange_name = exchange_name
+        self.heartbeat = heartbeat
         self.connection, self.channel = connect_to_rabbitmq(broker_ip, rabbit_port, rabbit_credentials,
-                                                            exchange_name, None)
+                                                            exchange_name, None, heartbeat)
         # self.channel.queue_declare(queue=queue_name, durable=True, auto_delete=True, passive=True)
         self.reply_queue = reply_queue
         self.stop_running = False
@@ -409,7 +413,7 @@ class ReplyThread(threading.Thread):
                     try:
                         self.connection, self.channel = connect_to_rabbitmq(self.broker_ip, self.rabbit_port,
                                                                             self.rabbit_credentials,
-                                                                            self.exchange_name, None)
+                                                                            self.exchange_name, None, self.heartbeat)
                         self.channel.basic_publish(exchange=self.exchange_name, routing_key=reply_to,
                                                    properties=pika.BasicProperties(correlation_id=corr_id,
                                                                                    content_type='text/plain'),
@@ -417,7 +421,8 @@ class ReplyThread(threading.Thread):
                         log.debug('Successfully sent reply')
                     except Exception as e:
                         log.error(
-                            'Also the second attempt to send the reply to the NFVO failed. Reply message will be discarded: {}'.format(e))
+                            'Also the second attempt to send the reply to the NFVO failed. Reply message will be discarded: {}'.format(
+                                e))
                 finally:
                     self.reply_queue.task_done()
         finally:
