@@ -93,7 +93,7 @@ class VimDriver(AbstractVimDriver):
         """ generated source for method addFlavor """
 
     @abstractmethod
-    def add_image(self, vim_instance: dict, image: dict, image_file_or_url: str) -> NFVImage:
+    def add_image(self, vim_instance: dict, image: dict, image_file_or_url: str, image_repo_token: str) -> NFVImage:
         """ generated source for method addImage """
 
     @abstractmethod
